@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <div class="form-header">
+                <h2>Registration Form</h2>
+                <p class="text-muted">Please fill in all the required information</p>
+            </div>
+            
+            <form id="registrationForm" class="needs-validation" novalidate>
+                <!-- Personal Information Section -->
+                <div class="section-title">Personal Information</div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="name" class="form-label">Full Name <span class="required">*</span></label>
+                        <input type="text" class="form-control" id="name" required>
+                        <div class="invalid-feedback">Please enter your name.</div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="contact" class="form-label">Contact Number <span class="required">*</span></label>
+                        <input type="tel" class="form-control" id="contact" pattern="[0-9]{10}" maxlength="10" required>
+                        <div class="invalid-feedback">Please enter a valid 10-digit contact number.</div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="dob" class="form-label">Date of Birth <span class="required">*</span></label>
+                        <input type="date" class="form-control" id="dob" required>
+                        <div class="invalid-feedback">Please select your date of birth.</div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label">Gender <span class="required">*</span></label>
+                        <div class="gender-options">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="gender" id="male" value="male" required>
+                                <label class="form-check-label" for="male">Male</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="gender" id="female" value="female">
+                                <label class="form-check-label" for="female">Female</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="gender" id="others" value="others">
+                                <label class="form-check-label" for="others">Others</label>
+                            </div>
+                        </div>
+                        <div class="invalid-feedback d-block" id="genderError"></div>
+                    </div>
+                </div>
+
+                <!-- Address Information Section -->
+                <div class="section-title">Address Information</div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="address1" class="form-label">Address Line 1 <span class="required">*</span></label>
+                        <input type="text" class="form-control" id="address1" required>
+                        <div class="invalid-feedback">Please enter address line 1.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="address2" class="form-label">Address Line 2</label>
+                        <input type="text" class="form-control" id="address2">
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="city" class="form-label">City <span class="required">*</span></label>
+                        <select class="form-select" id="city" required>
+                            <option value="">Select City</option>
+                            <option value="mumbai">Mumbai</option>
+                            <option value="delhi">Delhi</option>
+                            <option value="bangalore">Bangalore</option>
+                            <option value="hyderabad">Hyderabad</option>
+                            <option value="chennai">Chennai</option>
+                            <option value="kolkata">Kolkata</option>
+                            <option value="pune">Pune</option>
+                            <option value="ahmedabad">Ahmedabad</option>
+                        </select>
+                        <div class="invalid-feedback">Please select a city.</div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label for="state" class="form-label">State <span class="required">*</span></label>
+                        <select class="form-select" id="state" required>
+                            <option value="">Select State</option>
+                            <option value="maharashtra">Maharashtra</option>
+                            <option value="delhi">Delhi</option>
+                            <option value="karnataka">Karnataka</option>
+                            <option value="telangana">Telangana</option>
+                            <option value="tamil_nadu">Tamil Nadu</option>
+                            <option value="west_bengal">West Bengal</option>
+                            <option value="gujarat">Gujarat</option>
+                            <option value="rajasthan">Rajasthan</option>
+                        </select>
+                        <div class="invalid-feedback">Please select a state.</div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label for="postalCode" class="form-label">Postal Code <span class="required">*</span></label>
+                        <input type="text" class="form-control" id="postalCode" pattern="[0-9]{6}" required>
+                        <div class="invalid-feedback">Please enter a valid 6-digit postal code.</div>
+                    </div>
+                </div>
+
+                <!-- Bangalore Areas Section -->
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label for="bangaloreAreas" class="form-label">Bangalore Areas (Multi-select)</label>
+                        <select class="form-select" id="bangaloreAreas" multiple>
+                            <option value="whitefield">Whitefield</option>
+                            <option value="koramangala">Koramangala</option>
+                            <option value="indiranagar">Indiranagar</option>
+                            <option value="jayanagar">Jayanagar</option>
+                            <option value="malleshwaram">Malleshwaram</option>
+                            <option value="btm_layout">BTM Layout</option>
+                            <option value="electronic_city">Electronic City</option>
+                            <option value="hebbal">Hebbal</option>
+                            <option value="jp_nagar">JP Nagar</option>
+                            <option value="marathahalli">Marathahalli</option>
+                            <option value="mg_road">MG Road</option>
+                            <option value="banashankari">Banashankari</option>
+                            <option value="rajajinagar">Rajajinagar</option>
+                            <option value="hsr_layout">HSR Layout</option>
+                            <option value="yelahanka">Yelahanka</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Additional Information Section -->
+                <div class="section-title">Additional Information</div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="multiCity" class="form-label">Preferred Cities (Multi-select)</label>
+                        <select class="form-select" id="multiCity" multiple>
+                            <option value="mumbai">Mumbai</option>
+                            <option value="delhi">Delhi</option>
+                            <option value="bangalore">Bangalore</option>
+                            <option value="hyderabad">Hyderabad</option>
+                            <option value="chennai">Chennai</option>
+                            <option value="kolkata">Kolkata</option>
+                            <option value="pune">Pune</option>
+                            <option value="ahmedabad">Ahmedabad</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label for="multiPincode" class="form-label">Service Pincodes (Multi-select)</label>
+                        <select class="form-select" id="multiPincode" multiple>
+                            <option value="400001">400001 - Mumbai</option>
+                            <option value="110001">110001 - Delhi</option>
+                            <option value="560001">560001 - Bangalore</option>
+                            <option value="500001">500001 - Hyderabad</option>
+                            <option value="600001">600001 - Chennai</option>
+                            <option value="700001">700001 - Kolkata</option>
+                            <option value="411001">411001 - Pune</option>
+                            <option value="380001">380001 - Ahmedabad</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="language" class="form-label">Languages Known (Multi-select)</label>
+                        <select class="form-select" id="language" multiple>
+                            <option value="english">English</option>
+                            <option value="hindi">Hindi</option>
+                            <option value="marathi">Marathi</option>
+                            <option value="tamil">Tamil</option>
+                            <option value="telugu">Telugu</option>
+                            <option value="kannada">Kannada</option>
+                            <option value="bengali">Bengali</option>
+                            <option value="gujarati">Gujarati</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Account Information Section -->
+                <div class="section-title">Account Information</div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="status" class="form-label">Status <span class="required">*</span></label>
+                        <select class="form-select" id="status" required>
+                            <option value="">Select Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="suspended">Suspended</option>
+                        </select>
+                        <div class="invalid-feedback">Please select a status.</div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label for="onboardingDate" class="form-label">Onboarding Date <span class="required">*</span></label>
+                        <input type="date" class="form-control" id="onboardingDate" required>
+                        <div class="invalid-feedback">Please select onboarding date.</div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label for="type" class="form-label">Type <span class="required">*</span></label>
+                        <select class="form-select" id="type" required>
+                            <option value="">Select Type</option>
+                            <option value="individual">Individual</option>
+                            <option value="agency">Agency</option>
+                            <option value="sub_agency">Sub Agency</option>
+                        </select>
+                        <div class="invalid-feedback">Please select a type.</div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button type="reset" class="btn btn-secondary">Reset</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+
+            <!-- Form Summary Display -->
+            <div id="formSummary" class="form-summary">
+                <div class="summary-header">
+                    <div class="success-icon">✓</div>
+                    <h3>Form Submitted Successfully!</h3>
+                    <p class="text-muted">Here's a summary of your submission</p>
+                    <div class="json-save-notification">
+                        <strong>✓ Data saved in JSON format</strong>
+                    </div>
+                </div>
+                
+                <div id="summaryContent"></div>
+                
+                <div class="summary-actions">
+                    <button type="button" class="btn btn-secondary" onclick="editForm()">Edit Form</button>
+                   <!--<button type="button" class="btn btn-success" onclick="downloadJSON()">Download JSON</button>-->
+                    <button type="button" class="btn btn-primary" onclick="window.print()">Print Summary</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
