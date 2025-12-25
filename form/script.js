@@ -1,9 +1,177 @@
 // script.js
 
+// JSON Data
+const statesData = {
+    "AN": "Andaman and Nicobar Islands",
+    "AP": "Andhra Pradesh",
+    "AR": "Arunachal Pradesh",
+    "AS": "Assam",
+    "BR": "Bihar",
+    "CG": "Chandigarh",
+    "CH": "Chhattisgarh",
+    "DN": "Dadra and Nagar Haveli",
+    "DD": "Daman and Diu",
+    "DL": "Delhi",
+    "GA": "Goa",
+    "GJ": "Gujarat",
+    "HR": "Haryana",
+    "HP": "Himachal Pradesh",
+    "JK": "Jammu and Kashmir",
+    "JH": "Jharkhand",
+    "KA": "Karnataka",
+    "KL": "Kerala",
+    "LA": "Ladakh",
+    "LD": "Lakshadweep",
+    "MP": "Madhya Pradesh",
+    "MH": "Maharashtra",
+    "MN": "Manipur",
+    "ML": "Meghalaya",
+    "MZ": "Mizoram",
+    "NL": "Nagaland",
+    "OR": "Odisha",
+    "PY": "Puducherry",
+    "PB": "Punjab",
+    "RJ": "Rajasthan",
+    "SK": "Sikkim",
+    "TN": "Tamil Nadu",
+    "TS": "Telangana",
+    "TR": "Tripura",
+    "UP": "Uttar Pradesh",
+    "UK": "Uttarakhand",
+    "WB": "West Bengal"
+};
+
+const statePincodes = {
+    "Andhra Pradesh": "500001",
+    "Arunachal Pradesh": "791111",
+    "Assam": "781001",
+    "Bihar": "800001",
+    "Chhattisgarh": "492001",
+    "Goa": "403001",
+    "Gujarat": "380001",
+    "Haryana": "122001",
+    "Himachal Pradesh": "171001",
+    "Jharkhand": "834001",
+    "Karnataka": "560001",
+    "Kerala": "695001",
+    "Madhya Pradesh": "462001",
+    "Maharashtra": "400001",
+    "Manipur": "795001",
+    "Meghalaya": "793001",
+    "Mizoram": "796001",
+    "Nagaland": "797001",
+    "Odisha": "751001",
+    "Punjab": "160001",
+    "Rajasthan": "302001",
+    "Sikkim": "737101",
+    "Tamil Nadu": "600001",
+    "Telangana": "500001",
+    "Tripura": "799001",
+    "Uttar Pradesh": "226001",
+    "Uttarakhand": "248001",
+    "West Bengal": "700001"
+};
+
+const bangaloreAreasData = {
+    "city": "Bangalore",
+    "state": "Karnataka",
+    "areas": [
+        "Whitefield", "Koramangala", "Indiranagar", "Jayanagar", "Malleshwaram",
+        "BTM Layout", "Electronic City", "Hebbal", "JP Nagar", "Marathahalli",
+        "MG Road", "Banashankari", "Rajajinagar", "HSR Layout", "Yelahanka",
+        "Bellandur", "Sarjapur Road", "KR Puram", "Basavanagudi", "Vijayanagar",
+        "Ulsoor", "Domlur", "Nagawara", "RT Nagar", "Kengeri", "Mysore Road",
+        "Peenya", "Yeshwanthpur", "Sanjay Nagar", "Frazer Town", "Cooke Town",
+        "Richmond Town", "Shivajinagar", "Majestic", "Chandapura", "Hoskote",
+        "Bannerghatta Road", "Kanakapura Road", "Thanisandra", "Hennur",
+        "Horamavu", "Kadugodi", "Varthur", "Devanahalli", "Airport Road"
+    ]
+};
+
+const languagesData = [
+    { "label": "Assamese", "value": "Assamese" },
+    { "label": "Bengali", "value": "Bengali" },
+    { "label": "English", "value": "English" },
+    { "label": "Gujarati", "value": "Gujarati" },
+    { "label": "Hindi", "value": "Hindi" },
+    { "label": "Kannada", "value": "Kannada" },
+    { "label": "Konkani", "value": "Konkani" },
+    { "label": "Malayalam", "value": "Malayalam" },
+    { "label": "Manipuri", "value": "Manipuri" },
+    { "label": "Marathi", "value": "Marathi" },
+    { "label": "Mizo", "value": "Mizo" },
+    { "label": "Odia", "value": "Odia" },
+    { "label": "Punjabi", "value": "Punjabi" },
+    { "label": "Tamil", "value": "Tamil" },
+    { "label": "Telugu", "value": "Telugu" }
+];
+
+const stateCityMap = {
+    "andhra_pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore"],
+    "arunachal_pradesh": ["Itanagar", "Naharlagun"],
+    "assam": ["Guwahati", "Silchar", "Dibrugarh"],
+    "bihar": ["Patna", "Gaya", "Bhagalpur"],
+    "chhattisgarh": ["Raipur", "Bilaspur", "Durg"],
+    "goa": ["Panaji", "Margao"],
+    "gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot"],
+    "haryana": ["Gurgaon", "Faridabad", "Panipat"],
+    "himachal_pradesh": ["Shimla", "Dharamshala", "Solan"],
+    "jharkhand": ["Ranchi", "Jamshedpur", "Dhanbad"],
+    "karnataka": ["Bangalore", "Mysore", "Mangalore", "Hubli"],
+    "kerala": ["Kochi", "Thiruvananthapuram", "Kozhikode"],
+    "madhya_pradesh": ["Bhopal", "Indore", "Jabalpur"],
+    "maharashtra": ["Mumbai", "Pune", "Nagpur", "Nashik"],
+    "manipur": ["Imphal"],
+    "meghalaya": ["Shillong"],
+    "mizoram": ["Aizawl"],
+    "nagaland": ["Kohima", "Dimapur"],
+    "odisha": ["Bhubaneswar", "Cuttack", "Rourkela"],
+    "punjab": ["Chandigarh", "Ludhiana", "Amritsar"],
+    "rajasthan": ["Jaipur", "Jodhpur", "Udaipur", "Kota"],
+    "sikkim": ["Gangtok"],
+    "tamil_nadu": ["Chennai", "Coimbatore", "Madurai", "Trichy"],
+    "telangana": ["Hyderabad", "Warangal", "Nizamabad"],
+    "tripura": ["Agartala"],
+    "uttar_pradesh": ["Lucknow", "Kanpur", "Noida", "Agra"],
+    "uttarakhand": ["Dehradun", "Haridwar"],
+    "west_bengal": ["Kolkata", "Howrah", "Durgapur"]
+};
+
 // Global variable to store the form data
 let savedFormData = null;
 
 $(document).ready(function() {
+    // Populate States dropdown
+    const stateSelect = $('#state');
+    Object.entries(statesData).sort((a, b) => a[1].localeCompare(b[1])).forEach(([code, name]) => {
+        stateSelect.append(new Option(name, name.toLowerCase().replace(/\s+/g, '_')));
+    });
+
+    // Populate Bangalore Areas
+    const bangaloreAreasSelect = $('#bangaloreAreas');
+    bangaloreAreasData.areas.forEach(area => {
+        bangaloreAreasSelect.append(new Option(area, area.toLowerCase().replace(/\s+/g, '_')));
+    });
+
+    // Populate Languages
+    const languageSelect = $('#language');
+    languagesData.forEach(lang => {
+        languageSelect.append(new Option(lang.label, lang.value));
+    });
+
+    // Populate Preferred Cities (all unique cities from stateCityMap)
+    const multiCitySelect = $('#multiCity');
+    const allCities = [...new Set(Object.values(stateCityMap).flat())].sort();
+    allCities.forEach(city => {
+        multiCitySelect.append(new Option(city, city.toLowerCase().replace(/\s+/g, '_')));
+    });
+
+    // Populate Service Pincodes
+    const multiPincodeSelect = $('#multiPincode');
+    Object.entries(statePincodes).sort((a, b) => a[0].localeCompare(b[0])).forEach(([state, pincode]) => {
+        multiPincodeSelect.append(new Option(`${pincode} - ${state}`, pincode));
+    });
+
     // Initialize Select2 for multi-select dropdowns
     $('#multiCity').select2({
         theme: 'bootstrap-5',
@@ -26,12 +194,29 @@ $(document).ready(function() {
         width: '100%'
     });
 
-    // Initialize Select2 for Bangalore Areas
     $('#bangaloreAreas').select2({
         theme: 'bootstrap-5',
         placeholder: 'Select Bangalore areas',
         allowClear: true,
         width: '100%'
+    });
+
+    // State change handler - populate cities
+    $('#state').on('change', function() {
+        const selectedState = $(this).val();
+        const citySelect = $('#city');
+        
+        citySelect.empty().append(new Option('Select City', ''));
+        
+        if (selectedState && stateCityMap[selectedState]) {
+            citySelect.prop('disabled', false);
+            stateCityMap[selectedState].forEach(city => {
+                citySelect.append(new Option(city, city.toLowerCase().replace(/\s+/g, '_')));
+            });
+        } else {
+            citySelect.prop('disabled', true);
+            citySelect.append(new Option('Select State First', ''));
+        }
     });
 
     // Set max date for DOB (must be at least 18 years old)
@@ -48,23 +233,17 @@ $(document).ready(function() {
     const contactInput = document.getElementById('contact');
     
     contactInput.addEventListener('input', function(e) {
-        // Remove all non-numeric characters
         let value = this.value.replace(/[^0-9]/g, '');
-        
-        // Limit to 10 digits
         if (value.length > 10) {
             value = value.slice(0, 10);
         }
-        
         this.value = value;
     });
 
-    // Remove formatting on focus for easier editing
     contactInput.addEventListener('focus', function() {
         this.value = this.value.replace(/\s/g, '');
     });
 
-    // Add formatting on blur (optional visual enhancement)
     contactInput.addEventListener('blur', function() {
         let value = this.value.replace(/\s/g, '');
         if (value.length === 10) {
@@ -87,12 +266,10 @@ $(document).ready(function() {
         event.preventDefault();
         event.stopPropagation();
 
-        // Remove any spaces from contact number before validation
         const contactInput = document.getElementById('contact');
         const contactValue = contactInput.value.replace(/\s/g, '');
         contactInput.value = contactValue;
 
-        // Custom gender validation
         const genderSelected = document.querySelector('input[name="gender"]:checked');
         const genderError = document.getElementById('genderError');
         
@@ -103,9 +280,7 @@ $(document).ready(function() {
             genderError.style.display = 'none';
         }
 
-        // Check form validity
         if (form.checkValidity() && genderSelected) {
-            // Collect form data in structured JSON format
             const formData = {
                 personalInformation: {
                     name: document.getElementById('name').value,
@@ -116,8 +291,8 @@ $(document).ready(function() {
                 addressInformation: {
                     addressLine1: document.getElementById('address1').value,
                     addressLine2: document.getElementById('address2').value || null,
-                    city: document.getElementById('city').value,
                     state: document.getElementById('state').value,
+                    city: document.getElementById('city').value,
                     postalCode: document.getElementById('postalCode').value,
                     bangaloreAreas: $('#bangaloreAreas').val() || []
                 },
@@ -134,49 +309,42 @@ $(document).ready(function() {
                 submittedAt: new Date().toISOString()
             };
 
-            // Store the form data globally
             savedFormData = formData;
 
-            // Log the JSON data to console
             console.log('Form Data (JSON Format):');
             console.log(JSON.stringify(formData, null, 2));
             
-            // Display form summary
             displayFormSummary(formData);
             
-            // Hide the form and show summary
             form.style.display = 'none';
             document.getElementById('formSummary').classList.add('show');
             
-            // Scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         form.classList.add('was-validated');
     });
 
-    // Reset form validation on reset
     form.addEventListener('reset', function() {
         form.classList.remove('was-validated');
         document.getElementById('genderError').style.display = 'none';
         $('.select2').val(null).trigger('change');
         
-        // Show form and hide summary
+        // Reset city dropdown
+        $('#city').empty().append(new Option('Select State First', '')).prop('disabled', true);
+        
         form.style.display = 'block';
         document.getElementById('formSummary').classList.remove('show');
         
-        // Clear saved data
         savedFormData = null;
     });
 
-    // Real-time validation for gender
     document.querySelectorAll('input[name="gender"]').forEach(function(radio) {
         radio.addEventListener('change', function() {
             document.getElementById('genderError').style.display = 'none';
         });
     });
 
-    // Add visual feedback for date inputs
     const dateInputs = document.querySelectorAll('input[type="date"]');
     dateInputs.forEach(function(input) {
         input.addEventListener('focus', function() {
@@ -190,42 +358,14 @@ $(document).ready(function() {
         });
     });
 
-    // Prevent form submission on Enter key (except in textarea)
     form.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
             e.preventDefault();
         }
     });
 
-    // Dynamic state-city mapping (optional enhancement)
-    const stateCityMap = {
-        'maharashtra': ['mumbai', 'pune'],
-        'delhi': ['delhi'],
-        'karnataka': ['bangalore'],
-        'telangana': ['hyderabad'],
-        'tamil_nadu': ['chennai'],
-        'west_bengal': ['kolkata'],
-        'gujarat': ['ahmedabad']
-    };
-
-    document.getElementById('state').addEventListener('change', function() {
-        const citySelect = document.getElementById('city');
-        const selectedState = this.value;
-        
-        // This is a simple example - you can enhance this based on your needs
-        // For now, it just provides visual feedback
-        if (selectedState) {
-            citySelect.style.borderColor = '#667eea';
-            setTimeout(() => {
-                citySelect.style.borderColor = '#e0e0e0';
-            }, 500);
-        }
-    });
-
-    // Add animation on form load
     $('.form-container').hide().fadeIn(600);
 
-    // Smooth scroll to first error
     form.addEventListener('submit', function() {
         setTimeout(() => {
             const firstError = document.querySelector('.is-invalid, .form-check-input:invalid');
@@ -240,13 +380,11 @@ $(document).ready(function() {
 function displayFormSummary(data) {
     const summaryContent = document.getElementById('summaryContent');
     
-    // Helper function to format arrays
     const formatArray = (arr) => {
         if (!arr || arr.length === 0) return '<span class="text-muted">Not specified</span>';
         return arr.map(item => `<span class="badge">${item}</span>`).join(' ');
     };
     
-    // Helper function to capitalize
     const capitalize = (str) => {
         return str.charAt(0).toUpperCase() + str.slice(1).replace(/_/g, ' ');
     };
@@ -284,12 +422,12 @@ function displayFormSummary(data) {
                 <div class="summary-value">${data.addressInformation.addressLine2}</div>
             </div>` : ''}
             <div class="summary-row">
-                <div class="summary-label">City:</div>
-                <div class="summary-value">${capitalize(data.addressInformation.city)}</div>
-            </div>
-            <div class="summary-row">
                 <div class="summary-label">State:</div>
                 <div class="summary-value">${capitalize(data.addressInformation.state)}</div>
+            </div>
+            <div class="summary-row">
+                <div class="summary-label">City:</div>
+                <div class="summary-value">${capitalize(data.addressInformation.city)}</div>
             </div>
             <div class="summary-row">
                 <div class="summary-label">Postal Code:</div>
@@ -313,7 +451,7 @@ function displayFormSummary(data) {
             </div>
             <div class="summary-row">
                 <div class="summary-label">Languages Known:</div>
-                <div class="summary-value">${formatArray(data.additionalInformation.languagesKnown?.map(l => capitalize(l)))}</div>
+                <div class="summary-value">${formatArray(data.additionalInformation.languagesKnown)}</div>
             </div>
         </div>
         
@@ -332,12 +470,6 @@ function displayFormSummary(data) {
                 <div class="summary-value">${capitalize(data.accountInformation.type)}</div>
             </div>
         </div>
-        <!--
-        <div class="json-preview-section">
-            <div class="summary-section-title">JSON Data Preview</div>
-            <pre class="json-display">${JSON.stringify(data, null, 2)}</pre>
-        </div>
-         -->
     `;
     
     summaryContent.innerHTML = summaryHTML;
@@ -350,40 +482,7 @@ function editForm() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Download JSON Function
-/*function downloadJSON() {
-    if (!savedFormData) {
-        alert('No data to download!');
-        return;
-    }
-    
-    // Convert the data to JSON string with formatting
-    const dataStr = JSON.stringify(savedFormData, null, 2);
-    
-    // Create a Blob from the JSON string
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    
-    // Create a download link
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `registration_${new Date().getTime()}.json`;
-    
-    // Trigger the download
-    document.body.appendChild(link);
-    link.click();
-    
-    // Clean up
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    
-    // Show success message
-    console.log('JSON file downloaded successfully!');
-}
-*/
 // Additional utility functions
-
-// Validate age (18+)
 function validateAge(birthDate) {
     const today = new Date();
     const birth = new Date(birthDate);
@@ -397,20 +496,17 @@ function validateAge(birthDate) {
     return age >= 18;
 }
 
-// Format date for display
 function formatDate(dateString) {
     const date = new Date(dateString);
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     return date.toLocaleDateString('en-US', options);
 }
 
-// Validate phone number (exactly 10 digits)
 function isValidPhoneNumber(phone) {
     const phoneRegex = /^[0-9]{10}$/;
     return phoneRegex.test(phone);
 }
 
-// Validate postal code (6 digits)
 function isValidPostalCode(code) {
     const postalRegex = /^[0-9]{6}$/;
     return postalRegex.test(code);

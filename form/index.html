@@ -79,35 +79,19 @@
 
                 <div class="row mb-3">
                     <div class="col-md-4">
-                        <label for="city" class="form-label">City <span class="required">*</span></label>
-                        <select class="form-select" id="city" required>
-                            <option value="">Select City</option>
-                            <option value="mumbai">Mumbai</option>
-                            <option value="delhi">Delhi</option>
-                            <option value="bangalore">Bangalore</option>
-                            <option value="hyderabad">Hyderabad</option>
-                            <option value="chennai">Chennai</option>
-                            <option value="kolkata">Kolkata</option>
-                            <option value="pune">Pune</option>
-                            <option value="ahmedabad">Ahmedabad</option>
-                        </select>
-                        <div class="invalid-feedback">Please select a city.</div>
-                    </div>
-                    
-                    <div class="col-md-4">
                         <label for="state" class="form-label">State <span class="required">*</span></label>
                         <select class="form-select" id="state" required>
                             <option value="">Select State</option>
-                            <option value="maharashtra">Maharashtra</option>
-                            <option value="delhi">Delhi</option>
-                            <option value="karnataka">Karnataka</option>
-                            <option value="telangana">Telangana</option>
-                            <option value="tamil_nadu">Tamil Nadu</option>
-                            <option value="west_bengal">West Bengal</option>
-                            <option value="gujarat">Gujarat</option>
-                            <option value="rajasthan">Rajasthan</option>
                         </select>
                         <div class="invalid-feedback">Please select a state.</div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label for="city" class="form-label">City <span class="required">*</span></label>
+                        <select class="form-select" id="city" required disabled>
+                            <option value="">Select State First</option>
+                        </select>
+                        <div class="invalid-feedback">Please select a city.</div>
                     </div>
                     
                     <div class="col-md-4">
@@ -122,21 +106,6 @@
                     <div class="col-md-12">
                         <label for="bangaloreAreas" class="form-label">Bangalore Areas (Multi-select)</label>
                         <select class="form-select" id="bangaloreAreas" multiple>
-                            <option value="whitefield">Whitefield</option>
-                            <option value="koramangala">Koramangala</option>
-                            <option value="indiranagar">Indiranagar</option>
-                            <option value="jayanagar">Jayanagar</option>
-                            <option value="malleshwaram">Malleshwaram</option>
-                            <option value="btm_layout">BTM Layout</option>
-                            <option value="electronic_city">Electronic City</option>
-                            <option value="hebbal">Hebbal</option>
-                            <option value="jp_nagar">JP Nagar</option>
-                            <option value="marathahalli">Marathahalli</option>
-                            <option value="mg_road">MG Road</option>
-                            <option value="banashankari">Banashankari</option>
-                            <option value="rajajinagar">Rajajinagar</option>
-                            <option value="hsr_layout">HSR Layout</option>
-                            <option value="yelahanka">Yelahanka</option>
                         </select>
                     </div>
                 </div>
@@ -148,28 +117,12 @@
                     <div class="col-md-6">
                         <label for="multiCity" class="form-label">Preferred Cities (Multi-select)</label>
                         <select class="form-select" id="multiCity" multiple>
-                            <option value="mumbai">Mumbai</option>
-                            <option value="delhi">Delhi</option>
-                            <option value="bangalore">Bangalore</option>
-                            <option value="hyderabad">Hyderabad</option>
-                            <option value="chennai">Chennai</option>
-                            <option value="kolkata">Kolkata</option>
-                            <option value="pune">Pune</option>
-                            <option value="ahmedabad">Ahmedabad</option>
                         </select>
                     </div>
                     
                     <div class="col-md-6">
                         <label for="multiPincode" class="form-label">Service Pincodes (Multi-select)</label>
                         <select class="form-select" id="multiPincode" multiple>
-                            <option value="400001">400001 - Mumbai</option>
-                            <option value="110001">110001 - Delhi</option>
-                            <option value="560001">560001 - Bangalore</option>
-                            <option value="500001">500001 - Hyderabad</option>
-                            <option value="600001">600001 - Chennai</option>
-                            <option value="700001">700001 - Kolkata</option>
-                            <option value="411001">411001 - Pune</option>
-                            <option value="380001">380001 - Ahmedabad</option>
                         </select>
                     </div>
                 </div>
@@ -178,14 +131,6 @@
                     <div class="col-md-6">
                         <label for="language" class="form-label">Languages Known (Multi-select)</label>
                         <select class="form-select" id="language" multiple>
-                            <option value="english">English</option>
-                            <option value="hindi">Hindi</option>
-                            <option value="marathi">Marathi</option>
-                            <option value="tamil">Tamil</option>
-                            <option value="telugu">Telugu</option>
-                            <option value="kannada">Kannada</option>
-                            <option value="bengali">Bengali</option>
-                            <option value="gujarati">Gujarati</option>
                         </select>
                     </div>
                 </div>
@@ -245,7 +190,6 @@
                 
                 <div class="summary-actions">
                     <button type="button" class="btn btn-secondary" onclick="editForm()">Edit Form</button>
-                   <!--<button type="button" class="btn btn-success" onclick="downloadJSON()">Download JSON</button>-->
                     <button type="button" class="btn btn-primary" onclick="window.print()">Print Summary</button>
                 </div>
             </div>
