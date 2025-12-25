@@ -332,11 +332,12 @@ function displayFormSummary(data) {
                 <div class="summary-value">${capitalize(data.accountInformation.type)}</div>
             </div>
         </div>
-        
+        <!--
         <div class="json-preview-section">
             <div class="summary-section-title">JSON Data Preview</div>
             <pre class="json-display">${JSON.stringify(data, null, 2)}</pre>
         </div>
+         -->
     `;
     
     summaryContent.innerHTML = summaryHTML;
