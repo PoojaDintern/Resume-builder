@@ -314,6 +314,9 @@ $(document).ready(function() {
             console.log('Form Data (JSON Format):');
             console.log(JSON.stringify(formData, null, 2));
             
+            // Download JSON file
+            downloadJSONFile(formData);
+            
             displayFormSummary(formData);
             
             form.style.display = 'none';
@@ -391,7 +394,7 @@ function displayFormSummary(data) {
     
     const summaryHTML = `
         <div class="summary-section">
-            <div class="summary-section-title">Personal Information</div>
+        <div class="summary-section-title">Personal Information</div>
             <div class="summary-row">
                 <div class="summary-label">Full Name:</div>
                 <div class="summary-value">${data.personalInformation.name}</div>
@@ -409,105 +412,126 @@ function displayFormSummary(data) {
                 <div class="summary-value">${capitalize(data.personalInformation.gender)}</div>
             </div>
         </div>
-        
-        <div class="summary-section">
-            <div class="summary-section-title">Address Information</div>
-            <div class="summary-row">
-                <div class="summary-label">Address Line 1:</div>
-                <div class="summary-value">${data.addressInformation.addressLine1}</div>
-            </div>
-            ${data.addressInformation.addressLine2 ? `
-            <div class="summary-row">
-                <div class="summary-label">Address Line 2:</div>
-                <div class="summary-value">${data.addressInformation.addressLine2}</div>
-            </div>` : ''}
-            <div class="summary-row">
-                <div class="summary-label">State:</div>
-                <div class="summary-value">${capitalize(data.addressInformation.state)}</div>
-            </div>
-            <div class="summary-row">
-                <div class="summary-label">City:</div>
-                <div class="summary-value">${capitalize(data.addressInformation.city)}</div>
-            </div>
-            <div class="summary-row">
-                <div class="summary-label">Postal Code:</div>
-                <div class="summary-value">${data.addressInformation.postalCode}</div>
-            </div>
-            <div class="summary-row">
-                <div class="summary-label">Bangalore Areas:</div>
-                <div class="summary-value">${formatArray(data.addressInformation.bangaloreAreas?.map(a => capitalize(a)))}</div>
-            </div>
+    <div class="summary-section">
+        <div class="summary-section-title">Address Information</div>
+        <div class="summary-row">
+            <div class="summary-label">Address Line 1:</div>
+            <div class="summary-value">${data.addressInformation.addressLine1}</div>
         </div>
-        
-        <div class="summary-section">
-            <div class="summary-section-title">Additional Information</div>
-            <div class="summary-row">
-                <div class="summary-label">Preferred Cities:</div>
-                <div class="summary-value">${formatArray(data.additionalInformation.preferredCities?.map(c => capitalize(c)))}</div>
-            </div>
-            <div class="summary-row">
-                <div class="summary-label">Service Pincodes:</div>
-                <div class="summary-value">${formatArray(data.additionalInformation.servicePincodes)}</div>
-            </div>
-            <div class="summary-row">
-                <div class="summary-label">Languages Known:</div>
-                <div class="summary-value">${formatArray(data.additionalInformation.languagesKnown)}</div>
-            </div>
+        ${data.addressInformation.addressLine2 ? `
+        <div class="summary-row">
+            <div class="summary-label">Address Line 2:</div>
+            <div class="summary-value">${data.addressInformation.addressLine2}</div>
+        </div>` : ''}
+        <div class="summary-row">
+            <div class="summary-label">State:</div>
+            <div class="summary-value">${capitalize(data.addressInformation.state)}</div>
         </div>
-        
-        <div class="summary-section">
-            <div class="summary-section-title">Account Information</div>
-            <div class="summary-row">
-                <div class="summary-label">Status:</div>
-                <div class="summary-value">${capitalize(data.accountInformation.status)}</div>
-            </div>
-            <div class="summary-row">
-                <div class="summary-label">Onboarding Date:</div>
-                <div class="summary-value">${formatDate(data.accountInformation.onboardingDate)}</div>
-            </div>
-            <div class="summary-row">
-                <div class="summary-label">Type:</div>
-                <div class="summary-value">${capitalize(data.accountInformation.type)}</div>
-            </div>
+        <div class="summary-row">
+            <div class="summary-label">City:</div>
+            <div class="summary-value">${capitalize(data.addressInformation.city)}</div>
         </div>
-    `;
+        <div class="summary-row">
+            <div class="summary-label">Postal Code:</div>
+            <div class="summary-value">${data.addressInformation.postalCode}</div>
+        </div>
+        <div class="summary-row">
+            <div class="summary-label">Bangalore Areas:</div>
+            <div class="summary-value">${formatArray(data.addressInformation.bangaloreAreas?.map(a => capitalize(a)))}</div>
+        </div>
+    </div>
     
-    summaryContent.innerHTML = summaryHTML;
-}
+    <div class="summary-section">
+        <div class="summary-section-title">Additional Information</div>
+        <div class="summary-row">
+            <div class="summary-label">Preferred Cities:</div>
+            <div class="summary-value">${formatArray(data.additionalInformation.preferredCities?.map(c => capitalize(c)))}</div>
+        </div>
+        <div class="summary-row">
+            <div class="summary-label">Service Pincodes:</div>
+            <div class="summary-value">${formatArray(data.additionalInformation.servicePincodes)}</div>
+        </div>
+        <div class="summary-row">
+            <div class="summary-label">Languages Known:</div>
+            <div class="summary-value">${formatArray(data.additionalInformation.languagesKnown)}</div>
+        </div>
+    </div>
+    
+    <div class="summary-section">
+        <div class="summary-section-title">Account Information</div>
+        <div class="summary-row">
+            <div class="summary-label">Status:</div>
+            <div class="summary-value">${capitalize(data.accountInformation.status)}</div>
+        </div>
+        <div class="summary-row">
+            <div class="summary-label">Onboarding Date:</div>
+            <div class="summary-value">${formatDate(data.accountInformation.onboardingDate)}</div>
+        </div>
+        <div class="summary-row">
+            <div class="summary-label">Type:</div>
+            <div class="summary-value">${capitalize(data.accountInformation.type)}</div>
+        </div>
+    </div>
+`;
 
+summaryContent.innerHTML = summaryHTML;
+}
 // Edit Form Function
 function editForm() {
-    document.getElementById('registrationForm').style.display = 'block';
-    document.getElementById('formSummary').classList.remove('show');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+document.getElementById('registrationForm').style.display = 'block';
+document.getElementById('formSummary').classList.remove('show');
+window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+// Download JSON File Function
+function downloadJSONFile(data) {
+// Convert data to JSON string with proper formatting
+const jsonString = JSON.stringify(data, null, 2);
+// Create a Blob with the JSON data
+const blob = new Blob([jsonString], { type: 'application/json' });
 
+// Create a temporary download link
+const downloadLink = document.createElement('a');
+downloadLink.href = URL.createObjectURL(blob);
+
+// Generate filename with timestamp
+const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+const filename = `registration_form_${timestamp}.json`;
+downloadLink.download = filename;
+
+// Trigger download
+document.body.appendChild(downloadLink);
+downloadLink.click();
+
+// Cleanup
+document.body.removeChild(downloadLink);
+URL.revokeObjectURL(downloadLink.href);
+}
 // Additional utility functions
 function validateAge(birthDate) {
-    const today = new Date();
-    const birth = new Date(birthDate);
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-        age--;
-    }
-    
-    return age >= 18;
+const today = new Date();
+const birth = new Date(birthDate);
+let age = today.getFullYear() - birth.getFullYear();
+const monthDiff = today.getMonth() - birth.getMonth();
+if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
 }
 
+return age >= 18;
+}
 function formatDate(dateString) {
-    const date = new Date(dateString);
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    return date.toLocaleDateString('en-US', options);
+const date = new Date(dateString);
+const options = { year: 'numeric', month: 'long', day: 'numeric' };
+return date.toLocaleDateString('en-US', options);
 }
-
 function isValidPhoneNumber(phone) {
-    const phoneRegex = /^[0-9]{10}$/;
-    return phoneRegex.test(phone);
+const phoneRegex = /^[0-9]{10}$/;
+return phoneRegex.test(phone);
+}
+function isValidPostalCode(code) {
+const postalRegex = /^[0-9]{6}$/;
+return postalRegex.test(code);
 }
 
-function isValidPostalCode(code) {
-    const postalRegex = /^[0-9]{6}$/;
-    return postalRegex.test(code);
-}
+    
+
+            
