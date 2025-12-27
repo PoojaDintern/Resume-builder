@@ -6,6 +6,8 @@
     <title>Admin Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="dash.css">
 </head>
 <body>
@@ -17,33 +19,21 @@
         </div>
         <ul class="nav-menu">
             <li class="nav-item">
-                <a href="#" class="nav-link active">
+                <a class="nav-link active" data-page="dashboard">
                     <i class="fas fa-chart-line"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
-                    <i class="fas fa-building"></i>
-                    <span>Organizations</span>
+                <a class="nav-link" data-page="new-registration">
+                    <i class="fas fa-user-plus"></i>
+                    <span>New Registration</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a class="nav-link" data-page="users">
                     <i class="fas fa-users"></i>
                     <span>Users</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>Analytics</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link">
-                    <i class="fas fa-cog"></i>
-                    <span>Settings</span>
                 </a>
             </li>
         </ul>
@@ -65,23 +55,38 @@
             </button>
         </div>
 
-        <!-- Dashboard Content -->
-        <div class="dashboard-content">
+        <!-- Upload Section -->
+        <div class="dashboard-content" id="uploadSection">
+            <div class="upload-section">
+                <div class="upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <h2 class="upload-title">Upload User Data</h2>
+                <p class="upload-subtitle">Please upload a JSON file to generate the dashboard</p>
+                <div class="file-input-wrapper">
+                    <input type="file" id="jsonFileInput" accept=".json" onchange="handleFileUpload(event)">
+                    <label for="jsonFileInput" class="file-input-label">
+                        <i class="fas fa-file-upload"></i> Choose JSON File
+                    </label>
+                </div>
+                <div class="file-name" id="fileName"></div>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div class="dashboard-content hidden" id="dashboardSection">
             <div class="container-fluid">
-                <!-- Stats Row -->
                 <div class="row g-4 mb-4">
-                    <!-- Total Users -->
                     <div class="col-md-6 col-lg-3">
                         <div class="stats-card">
                             <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                                 <i class="fas fa-users" style="color: white;"></i>
                             </div>
                             <div class="stat-label">Total Users</div>
-                            <div class="stat-value" id="totalUsers">2</div>
+                            <div class="stat-value" id="totalUsers">0</div>
                         </div>
                     </div>
 
-                    <!-- Class Types Combined -->
                     <div class="col-md-6 col-lg-9">
                         <div class="class-types" style="height: 100%;">
                             <h5 class="chart-title mb-3">User Class Types</h5>
@@ -97,7 +102,7 @@
                                     <i class="fas fa-user"></i>
                                     <span>Individual</span>
                                 </div>
-                                <div class="class-type-value" id="individualCount">2</div>
+                                <div class="class-type-value" id="individualCount">0</div>
                             </div>
                             <div class="class-type-item sub-agency">
                                 <div class="class-type-label">
@@ -110,9 +115,7 @@
                     </div>
                 </div>
 
-                <!-- Charts Row -->
                 <div class="row g-4 mb-4">
-                    <!-- City-wise Users Chart -->
                     <div class="col-lg-6">
                         <div class="chart-card">
                             <h5 class="chart-title">City-wise Users</h5>
@@ -120,7 +123,6 @@
                         </div>
                     </div>
 
-                    <!-- Weekly Activity Chart -->
                     <div class="col-lg-6">
                         <div class="chart-card">
                             <h5 class="chart-title">Registrations by Date</h5>
@@ -129,8 +131,7 @@
                     </div>
                 </div>
 
-                <!-- Users Table -->
-                <div class="table-card">
+                <div class="table-card" id="userTableSection">
                     <h5 class="chart-title">User Details</h5>
                     <div class="table-responsive">
                         <table class="table table-hover" id="userTable">
@@ -142,16 +143,178 @@
                                 </tr>
                             </thead>
                             <tbody id="userTableBody">
-                                <!-- Data populated by JavaScript -->
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Registration Form Section -->
+        <div class="dashboard-content hidden" id="registrationSection">
+            <div class="container">
+                <div class="form-container">
+                    <div class="form-header">
+                        <h2>Registration Form</h2>
+                        <p class="text-muted">Please fill in all the required information</p>
+                    </div>
+                    
+                    <form id="registrationForm" class="needs-validation" novalidate>
+                        <div class="section-title">Personal Information</div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="name" class="form-label">Full Name <span class="required">*</span></label>
+                                <input type="text" class="form-control" id="name" required>
+                                <div class="invalid-feedback">Please enter your name.</div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="contact" class="form-label">Contact Number <span class="required">*</span></label>
+                                <input type="tel" class="form-control" id="contact" pattern="[0-9]{10}" maxlength="10" required>
+                                <div class="invalid-feedback">Please enter a valid 10-digit contact number.</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="dob" class="form-label">Date of Birth <span class="required">*</span></label>
+                                <input type="date" class="form-control" id="dob" required>
+                                <div class="invalid-feedback">Please select your date of birth.</div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">Gender <span class="required">*</span></label>
+                                <div class="gender-options">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="gender" id="male" value="male" required>
+                                        <label class="form-check-label" for="male">Male</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="gender" id="female" value="female">
+                                        <label class="form-check-label" for="female">Female</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="gender" id="others" value="others">
+                                        <label class="form-check-label" for="others">Others</label>
+                                    </div>
+                                </div>
+                                <div class="invalid-feedback d-block" id="genderError"></div>
+                            </div>
+                        </div>
+
+                        <div class="section-title">Address Information</div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="address1" class="form-label">Address Line 1 <span class="required">*</span></label>
+                                <input type="text" class="form-control" id="address1" required>
+                                <div class="invalid-feedback">Please enter address line 1.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="address2" class="form-label">Address Line 2</label>
+                                <input type="text" class="form-control" id="address2">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="state" class="form-label">State <span class="required">*</span></label>
+                                <select class="form-select" id="state" required>
+                                    <option value="">Select State</option>
+                                </select>
+                                <div class="invalid-feedback">Please select a state.</div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="city" class="form-label">City <span class="required">*</span></label>
+                                <select class="form-select" id="city" required disabled>
+                                    <option value="">Select State First</option>
+                                </select>
+                                <div class="invalid-feedback">Please select a city.</div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="postalCode" class="form-label">Postal Code <span class="required">*</span></label>
+                                <input type="text" class="form-control" id="postalCode" pattern="[0-9]{6}" required>
+                                <div class="invalid-feedback">Please enter a valid 6-digit postal code.</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label for="bangaloreAreas" class="form-label">Bangalore Areas (Multi-select)</label>
+                                <select class="form-select" id="bangaloreAreas" multiple>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="section-title">Additional Information</div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="multiCity" class="form-label">Preferred Cities (Multi-select)</label>
+                                <select class="form-select" id="multiCity" multiple>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="multiPincode" class="form-label">Service Pincodes (Multi-select)</label>
+                                <select class="form-select" id="multiPincode" multiple>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="language" class="form-label">Languages Known (Multi-select)</label>
+                                <select class="form-select" id="language" multiple>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="section-title">Account Information</div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="status" class="form-label">Status <span class="required">*</span></label>
+                                <select class="form-select" id="status" required>
+                                    <option value="">Select Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                    <option value="suspended">Suspended</option>
+                                </select>
+                                <div class="invalid-feedback">Please select a status.</div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="onboardingDate" class="form-label">Onboarding Date <span class="required">*</span></label>
+                                <input type="date" class="form-control" id="onboardingDate" required>
+                                <div class="invalid-feedback">Please select onboarding date.</div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="type" class="form-label">Type <span class="required">*</span></label>
+                                <select class="form-select" id="type" required>
+                                    <option value="">Select Type</option>
+                                    <option value="individual">Individual</option>
+                                    <option value="agency">Agency</option>
+                                    <option value="sub_agency">Sub Agency</option>
+                                </select>
+                                <div class="invalid-feedback">Please select a type.</div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="reset" class="btn btn-secondary">Reset</button>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Footer -->
     <footer>
         <div class="container-fluid">
             <div class="footer-content">
@@ -195,13 +358,15 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 Dashboard. All rights reserved. | Designed with <i class="fas fa-heart" style="color: #f87171;"></i> by Your Team</p>
+                <p>&copy; 2025 Dashboard. All rights reserved. | Designed with <i class="fas fa-heart" style="color: #f87171;"></i> by Pooja</p>
             </div>
         </div>
     </footer>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="dash.js"></script>
 </body>
 </html>

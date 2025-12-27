@@ -1,3 +1,5 @@
+/* dashboard.css */
+
 * {
     margin: 0;
     padding: 0;
@@ -72,6 +74,7 @@ body {
     border-radius: 10px;
     transition: all 0.3s;
     font-weight: 500;
+    cursor: pointer;
 }
 
 .nav-link:hover, .nav-link.active {
@@ -304,7 +307,7 @@ body {
     color: #991b1b;
 }
 
-.status-pending {
+.status-pending, .status-suspended {
     background: #fef3c7;
     color: #92400e;
 }
@@ -393,6 +396,340 @@ footer {
     color: rgba(255,255,255,0.7);
 }
 
+/* Upload Section */
+.upload-section {
+    background: white;
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    text-align: center;
+    max-width: 600px;
+    margin: 50px auto;
+}
+
+.upload-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 40px;
+    color: white;
+}
+
+.upload-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 10px;
+}
+
+.upload-subtitle {
+    color: #6b7280;
+    margin-bottom: 30px;
+}
+
+.file-input-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.file-input-wrapper input[type="file"] {
+    display: none;
+}
+
+.file-input-label {
+    padding: 15px 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-block;
+}
+
+.file-input-label:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102,126,234,0.4);
+}
+
+.file-name {
+    margin-top: 15px;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Registration Form Styles */
+.form-container {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    padding: 40px;
+    margin: 20px 0;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.form-header h2 {
+    color: #2c3e50;
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.form-header p {
+    color: #7f8c8d;
+    font-size: 16px;
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #34495e;
+    margin: 30px 0 20px 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #667eea;
+    position: relative;
+}
+
+.section-title::before {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: #764ba2;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.required {
+    color: #e74c3c;
+    font-weight: 700;
+}
+
+.form-control,
+.form-select {
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 12px 15px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background-color: #fafafa;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+    background-color: #ffffff;
+}
+
+.form-control:hover,
+.form-select:hover {
+    border-color: #b8c2f0;
+}
+
+.form-control:disabled,
+.form-select:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+}
+
+.gender-options {
+    padding-top: 8px;
+}
+
+.form-check-inline {
+    margin-right: 25px;
+}
+
+.form-check-input {
+    width: 20px;
+    height: 20px;
+    margin-top: 0;
+    cursor: pointer;
+    border: 2px solid #d0d0d0;
+}
+
+.form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+.form-check-label {
+    font-weight: 500;
+    color: #2c3e50;
+    cursor: pointer;
+    padding-left: 5px;
+}
+
+.invalid-feedback {
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 2px solid #f0f0f0;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 12px 35px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+    background-color: #95a5a6;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #7f8c8d;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(127, 140, 141, 0.4);
+}
+
+.btn-success {
+    background-color: #27ae60;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #229954;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(39, 174, 96, 0.4);
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+/* Select2 Custom Styling */
+.select2-container--bootstrap-5 .select2-selection {
+    border: 2px solid #e0e0e0 !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    min-height: 48px !important;
+    background-color: #fafafa !important;
+}
+
+.select2-container--bootstrap-5 .select2-selection:hover {
+    border-color: #b8c2f0 !important;
+}
+
+.select2-container--bootstrap-5.select2-container--focus .select2-selection {
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15) !important;
+    background-color: #ffffff !important;
+}
+
+.select2-container--bootstrap-5 .select2-selection__choice {
+    background-color: #ffffff !important;
+    border: 1px solid #e0e0e0 !important;
+    color: #2c3e50 !important;
+    border-radius: 4px !important;
+    padding: 4px 8px !important;
+    margin: 2px 3px 2px 0 !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+}
+
+.select2-container--bootstrap-5 .select2-selection__choice__remove {
+    color: #666 !important;
+    margin-right: 5px !important;
+    font-weight: normal !important;
+}
+
+.select2-container--bootstrap-5 .select2-selection__choice__remove:hover {
+    color: #e74c3c !important;
+}
+
+.select2-container--bootstrap-5 .select2-selection--multiple {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.select2-container--bootstrap-5 .select2-search__field {
+    margin-top: 4px !important;
+}
+
+.select2-container--bootstrap-5 .select2-results__option--highlighted {
+    background-color: #f8f9fa !important;
+    color: #2c3e50 !important;
+}
+
+.select2-container--bootstrap-5 .select2-results__option {
+    padding: 10px 15px !important;
+    transition: all 0.2s ease !important;
+}
+
+.select2-container--bootstrap-5 .select2-results__option:hover {
+    background-color: #f0f2ff !important;
+}
+
+.select2-container--bootstrap-5 .select2-results__option--selected {
+    background-color: #f8f9fa !important;
+    color: #2c3e50 !important;
+    font-weight: 400 !important;
+}
+
+.select2-container--bootstrap-5 .select2-results__option--selected:before {
+    content: "✓ ";
+    font-weight: normal;
+    margin-right: 5px;
+    color: #666;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
     .sidebar {
         transform: translateX(-100%);
@@ -412,5 +749,36 @@ footer {
 
     .search-bar {
         max-width: 100%;
+    }
+
+    .form-container {
+        padding: 25px;
+    }
+    
+    .form-header h2 {
+        font-size: 24px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+    
+    .form-check-inline {
+        display: block;
+        margin-bottom: 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .form-container {
+        padding: 20px;
+    }
+    
+    .section-title {
+        font-size: 18px;
     }
 }
