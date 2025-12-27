@@ -1,4 +1,7 @@
-// script.js
+// script.js - WITH PERSISTENT STORAGE
+
+// Storage key for IndexedDB/localStorage
+const STORAGE_KEY = 'registrationSubmissions';
 
 // JSON Data
 const statesData = {
@@ -137,10 +140,47 @@ const stateCityMap = {
     "west_bengal": ["Kolkata", "Howrah", "Durgapur"]
 };
 
-// Global variable to store the form data
-let savedFormData = null;
+// ===== PERSISTENT STORAGE FUNCTIONS =====
+
+// Load all submissions from localStorage
+function loadSubmissionsFromStorage() {
+    try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            return JSON.parse(stored);
+        }
+    } catch (error) {
+        console.error('Error loading submissions from storage:', error);
+    }
+    return [];
+}
+
+// Save all submissions to localStorage
+function saveSubmissionsToStorage(submissions) {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(submissions));
+        console.log(`Saved ${submissions.length} submissions to browser storage`);
+        return true;
+    } catch (error) {
+        console.error('Error saving submissions to storage:', error);
+        alert('Warning: Could not save to browser storage. Data may be lost on page refresh.');
+        return false;
+    }
+}
+
+// Initialize submissions array from storage
+let allSubmissions = loadSubmissionsFromStorage();
+
+// ===== INITIALIZATION =====
 
 $(document).ready(function() {
+    // Load existing submissions and update counter
+    updateSubmissionCounter();
+    if (allSubmissions.length > 0) {
+        document.getElementById('downloadAllBtn').style.display = 'inline-block';
+        document.getElementById('clearAllBtn').style.display = 'inline-block';
+    }
+
     // Populate States dropdown
     const stateSelect = $('#state');
     Object.entries(statesData).sort((a, b) => a[1].localeCompare(b[1])).forEach(([code, name]) => {
@@ -159,7 +199,7 @@ $(document).ready(function() {
         languageSelect.append(new Option(lang.label, lang.value));
     });
 
-    // Populate Preferred Cities (all unique cities from stateCityMap)
+    // Populate Preferred Cities
     const multiCitySelect = $('#multiCity');
     const allCities = [...new Set(Object.values(stateCityMap).flat())].sort();
     allCities.forEach(city => {
@@ -172,7 +212,7 @@ $(document).ready(function() {
         multiPincodeSelect.append(new Option(`${pincode} - ${state}`, pincode));
     });
 
-    // Initialize Select2 for multi-select dropdowns
+    // Initialize Select2
     $('#multiCity').select2({
         theme: 'bootstrap-5',
         placeholder: 'Select cities',
@@ -201,7 +241,7 @@ $(document).ready(function() {
         width: '100%'
     });
 
-    // State change handler - populate cities
+    // State change handler
     $('#state').on('change', function() {
         const selectedState = $(this).val();
         const citySelect = $('#city');
@@ -219,17 +259,16 @@ $(document).ready(function() {
         }
     });
 
-    // Set max date for DOB (must be at least 18 years old)
+    // Set date constraints
     const today = new Date();
     const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
     const maxDateString = maxDate.toISOString().split('T')[0];
     document.getElementById('dob').setAttribute('max', maxDateString);
 
-    // Set max date for onboarding date (today)
     const todayString = today.toISOString().split('T')[0];
     document.getElementById('onboardingDate').setAttribute('max', todayString);
 
-    // Contact number validation - only numbers, max 10 digits
+    // Contact number validation
     const contactInput = document.getElementById('contact');
     
     contactInput.addEventListener('input', function(e) {
@@ -251,7 +290,7 @@ $(document).ready(function() {
         }
     });
 
-    // Postal code validation - only numbers
+    // Postal code validation
     document.getElementById('postalCode').addEventListener('input', function(e) {
         this.value = this.value.replace(/[^0-9]/g, '');
         if (this.value.length > 6) {
@@ -259,7 +298,7 @@ $(document).ready(function() {
         }
     });
 
-    // Form validation
+    // Form submission
     const form = document.getElementById('registrationForm');
     
     form.addEventListener('submit', function(event) {
@@ -282,6 +321,7 @@ $(document).ready(function() {
 
         if (form.checkValidity() && genderSelected) {
             const formData = {
+                submissionId: allSubmissions.length + 1,
                 personalInformation: {
                     name: document.getElementById('name').value,
                     contact: contactValue,
@@ -309,13 +349,22 @@ $(document).ready(function() {
                 submittedAt: new Date().toISOString()
             };
 
-            savedFormData = formData;
-
-            console.log('Form Data (JSON Format):');
-            console.log(JSON.stringify(formData, null, 2));
+            // Add to submissions array
+            allSubmissions.push(formData);
             
-            // Download JSON file
-            downloadJSONFile(formData);
+            // Save to persistent storage
+            saveSubmissionsToStorage(allSubmissions);
+            
+            // Update UI
+            updateSubmissionCounter();
+            document.getElementById('downloadAllBtn').style.display = 'inline-block';
+            document.getElementById('clearAllBtn').style.display = 'inline-block';
+
+            // Auto-download updated JSON
+            downloadAllSubmissionsAuto();
+
+            console.log('Current Submission:', JSON.stringify(formData, null, 2));
+            console.log('Total Submissions:', allSubmissions.length);
             
             displayFormSummary(formData);
             
@@ -332,14 +381,7 @@ $(document).ready(function() {
         form.classList.remove('was-validated');
         document.getElementById('genderError').style.display = 'none';
         $('.select2').val(null).trigger('change');
-        
-        // Reset city dropdown
         $('#city').empty().append(new Option('Select State First', '')).prop('disabled', true);
-        
-        form.style.display = 'block';
-        document.getElementById('formSummary').classList.remove('show');
-        
-        savedFormData = null;
     });
 
     document.querySelectorAll('input[name="gender"]').forEach(function(radio) {
@@ -348,38 +390,16 @@ $(document).ready(function() {
         });
     });
 
-    const dateInputs = document.querySelectorAll('input[type="date"]');
-    dateInputs.forEach(function(input) {
-        input.addEventListener('focus', function() {
-            this.style.borderColor = '#667eea';
-        });
-        
-        input.addEventListener('blur', function() {
-            if (!this.value) {
-                this.style.borderColor = '#e0e0e0';
-            }
-        });
-    });
-
-    form.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
-            e.preventDefault();
-        }
-    });
-
     $('.form-container').hide().fadeIn(600);
-
-    form.addEventListener('submit', function() {
-        setTimeout(() => {
-            const firstError = document.querySelector('.is-invalid, .form-check-input:invalid');
-            if (firstError) {
-                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }, 100);
-    });
 });
 
-// Display Form Summary Function
+// ===== UI UPDATE FUNCTIONS =====
+
+function updateSubmissionCounter() {
+    const counter = document.getElementById('submissionCounter');
+    counter.innerHTML = `Total Submissions: <strong>${allSubmissions.length}</strong>`;
+}
+
 function displayFormSummary(data) {
     const summaryContent = document.getElementById('summaryContent');
     
@@ -394,7 +414,11 @@ function displayFormSummary(data) {
     
     const summaryHTML = `
         <div class="summary-section">
-        <div class="summary-section-title">Personal Information</div>
+            <div class="summary-section-title">Submission #${data.submissionId}</div>
+        </div>
+        
+        <div class="summary-section">
+            <div class="summary-section-title">Personal Information</div>
             <div class="summary-row">
                 <div class="summary-label">Full Name:</div>
                 <div class="summary-value">${data.personalInformation.name}</div>
@@ -412,35 +436,35 @@ function displayFormSummary(data) {
                 <div class="summary-value">${capitalize(data.personalInformation.gender)}</div>
             </div>
         </div>
-    <div class="summary-section">
-        <div class="summary-section-title">Address Information</div>
-        <div class="summary-row">
-            <div class="summary-label">Address Line 1:</div>
-            <div class="summary-value">${data.addressInformation.addressLine1}</div>
-        </div>
-        ${data.addressInformation.addressLine2 ? `
-        <div class="summary-row">
-            <div class="summary-label">Address Line 2:</div>
-            <div class="summary-value">${data.addressInformation.addressLine2}</div>
-        </div>` : ''}
-        <div class="summary-row">
-            <div class="summary-label">State:</div>
-            <div class="summary-value">${capitalize(data.addressInformation.state)}</div>
-        </div>
-        <div class="summary-row">
-            <div class="summary-label">City:</div>
-            <div class="summary-value">${capitalize(data.addressInformation.city)}</div>
-        </div>
-        <div class="summary-row">
-            <div class="summary-label">Postal Code:</div>
-            <div class="summary-value">${data.addressInformation.postalCode}</div>
-        </div>
-        <div class="summary-row">
-            <div class="summary-label">Bangalore Areas:</div>
-            <div class="summary-value">${formatArray(data.addressInformation.bangaloreAreas?.map(a => capitalize(a)))}</div>
-        </div>
-    </div>
-    
+        
+        <div class="summary-section">
+            <div class="summary-section-title">Address Information</div>
+            <div class="summary-row">
+                <div class="summary-label">Address Line 1:</div>
+                <div class="summary-value">${data.addressInformation.addressLine1}</div>
+            </div>
+            ${data.addressInformation.addressLine2 ? `
+            <div class="summary-row">
+                <div class="summary-label">Address Line 2:</div>
+                <div class="summary-value">${data.addressInformation.addressLine2}</div>
+            </div>` : ''}
+            <div class="summary-row">
+                <div class="summary-label">State:</div>
+                <div class="summary-value">${capitalize(data.addressInformation.state)}</div>
+            </div>
+            <div class="summary-row">
+                <div class="summary-label">City:</div>
+                <div class="summary-value">${capitalize(data.addressInformation.city)}</div>
+</div>
+<div class="summary-row">
+<div class="summary-label">Postal Code:</div>
+<div class="summary-value">${data.addressInformation.postalCode}</div>
+</div>
+<div class="summary-row">
+<div class="summary-label">Bangalore Areas:</div>
+<div class="summary-value">${formatArray(data.addressInformation.bangaloreAreas?.map(a => capitalize(a)))}</div>
+</div>
+</div>
     <div class="summary-section">
         <div class="summary-section-title">Additional Information</div>
         <div class="summary-row">
@@ -476,62 +500,64 @@ function displayFormSummary(data) {
 
 summaryContent.innerHTML = summaryHTML;
 }
-// Edit Form Function
-function editForm() {
-document.getElementById('registrationForm').style.display = 'block';
+function submitAnother() {
+const form = document.getElementById('registrationForm');
+form.reset();
+form.classList.remove('was-validated');
+document.getElementById('genderError').style.display = 'none';
+$('.select2').val(null).trigger('change');
+$('#city').empty().append(new Option('Select State First', '')).prop('disabled', true);
+form.style.display = 'block';
 document.getElementById('formSummary').classList.remove('show');
+
 window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-// Download JSON File Function
-function downloadJSONFile(data) {
-// Convert data to JSON string with proper formatting
-const jsonString = JSON.stringify(data, null, 2);
-// Create a Blob with the JSON data
+// ===== DOWNLOAD FUNCTIONS =====
+function downloadAllSubmissions() {
+if (allSubmissions.length === 0) {
+alert('No submissions to download!');
+return;
+}
+performDownload();
+}
+function downloadAllSubmissionsAuto() {
+performDownload();
+}
+function performDownload() {
+const exportData = {
+totalSubmissions: allSubmissions.length,
+exportedAt: new Date().toISOString(),
+submissions: allSubmissions
+};
+const jsonString = JSON.stringify(exportData, null, 2);
 const blob = new Blob([jsonString], { type: 'application/json' });
-
-// Create a temporary download link
 const downloadLink = document.createElement('a');
 downloadLink.href = URL.createObjectURL(blob);
+downloadLink.download = 'all_registrations.json';
 
-// Generate filename with timestamp
-const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-const filename = `registration_form_${timestamp}.json`;
-downloadLink.download = filename;
-
-// Trigger download
 document.body.appendChild(downloadLink);
 downloadLink.click();
-
-// Cleanup
 document.body.removeChild(downloadLink);
 URL.revokeObjectURL(downloadLink.href);
-}
-// Additional utility functions
-function validateAge(birthDate) {
-const today = new Date();
-const birth = new Date(birthDate);
-let age = today.getFullYear() - birth.getFullYear();
-const monthDiff = today.getMonth() - birth.getMonth();
-if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-    age--;
-}
 
-return age >= 18;
+console.log(`Downloaded ${allSubmissions.length} submissions to all_registrations.json`);
 }
+// ===== CLEAR DATA FUNCTION =====
+function clearAllData() {
+if (confirm('Are you sure you want to clear ALL submission data? This cannot be undone!')) {
+if (confirm('This will permanently delete all ' + allSubmissions.length + ' submissions. Are you absolutely sure?')) {
+allSubmissions = [];
+saveSubmissionsToStorage(allSubmissions);
+updateSubmissionCounter();
+document.getElementById('downloadAllBtn').style.display = 'none';
+document.getElementById('clearAllBtn').style.display = 'none';
+alert('All submission data has been cleared!');
+}
+}
+}
+// ===== UTILITY FUNCTIONS =====
 function formatDate(dateString) {
 const date = new Date(dateString);
 const options = { year: 'numeric', month: 'long', day: 'numeric' };
 return date.toLocaleDateString('en-US', options);
 }
-function isValidPhoneNumber(phone) {
-const phoneRegex = /^[0-9]{10}$/;
-return phoneRegex.test(phone);
-}
-function isValidPostalCode(code) {
-const postalRegex = /^[0-9]{6}$/;
-return postalRegex.test(code);
-}
-
-    
-
-            
