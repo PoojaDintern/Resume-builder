@@ -277,8 +277,8 @@ document.getElementById('photo').addEventListener('change', e => {
     });
 });
 
-// Preview resume
-function previewResume() {
+// Preview resume function
+async function previewResume() {
     const req = ['fullName', 'email', 'dob', 'phone', 'location', 'objective', 'signature'];
     let valid = true;
     let errors = [];
@@ -690,8 +690,20 @@ function downloadPDF() {
         })
         .catch(err => {
             console.error(err);
-            if (buttons) buttons.style.display= "flex";
+            if (buttons) buttons.style.display = "flex";
         });
+}
+
+// Wrapper function for save button - NEWLY ADDED
+async function saveToDatabase() {
+    console.log('Save button clicked!');
+    const result = await saveResumeToDatabase();
+    
+    if (result.success) {
+        alert(`✓ Resume saved successfully!\nResume ID: ${result.resume_id}`);
+    } else {
+        alert(`❌ Failed to save resume:\n${result.message}`);
+    }
 }
 
 // Initialize with one item of each major section
