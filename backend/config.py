@@ -1,5 +1,5 @@
 """
-Database Configuration - FIXED VERSION
+Database Configuration - Complete Version
 ----------------------------
 Manages database connection using Windows Authentication
 """
@@ -47,9 +47,31 @@ class Config:
         try:
             conn = Config.get_db_connection()
             cursor = conn.cursor()
+            
+            # Test query
             cursor.execute("SELECT @@VERSION")
             version = cursor.fetchone()
-            print(f"✓ SQL Server version: {version[0][:50]}...")
+            print(f"✓ SQL Server version: {version[0][:80]}...")
+            
+            # Check if VisitorCount and DownloadCount columns exist
+            cursor.execute("""
+                SELECT COLUMN_NAME 
+                FROM INFORMATION_SCHEMA.COLUMNS 
+                WHERE TABLE_NAME = 'Resumes' 
+                AND COLUMN_NAME IN ('VisitorCount', 'DownloadCount')
+            """)
+            columns = [row[0] for row in cursor.fetchall()]
+            
+            if 'VisitorCount' in columns:
+                print("✓ VisitorCount column exists")
+            else:
+                print("⚠️  VisitorCount column missing - run schema update")
+            
+            if 'DownloadCount' in columns:
+                print("✓ DownloadCount column exists")
+            else:
+                print("⚠️  DownloadCount column missing - run schema update")
+            
             cursor.close()
             conn.close()
             return True
@@ -60,5 +82,8 @@ class Config:
 
 if __name__ == '__main__':
     """Test the connection when run directly"""
-    print("Testing database connection...")
+    print("\n" + "="*50)
+    print("Testing Database Connection")
+    print("="*50)
     Config.test_connection()
+    print("="*50 + "\n")

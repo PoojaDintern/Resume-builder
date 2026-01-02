@@ -1,13 +1,15 @@
 """
-Flask Main Application - Complete Version with Dashboard Support
+Flask Main Application - Complete with Authentication
 -----------------------------------------------------------------
-Fixed for SQL Server PascalCase column names
+Handles all API endpoints including auth, visitor and download tracking
 """
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from config import Config
 from datetime import datetime
+import hashlib
+import re
 
 def create_app():
     """Creates and configures the Flask application"""
@@ -30,6 +32,34 @@ def create_app():
 app = create_app()
 
 
+# ==================== HELPER FUNCTIONS ====================
+
+def hash_password(password):
+    """Hash password using SHA-256"""
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def validate_email(email):
+    """Validate email format"""
+    pattern = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
+    return re.match(pattern, email) is not None
+
+def validate_phone(phone):
+    """Validate phone number (10 digits)"""
+    return re.match(r'^\d{10}$', phone) is not None
+
+def validate_password(password):
+    """Validate password strength"""
+    if len(password) < 8:
+        return False
+    if not re.search(r'[A-Z]', password):
+        return False
+    if not re.search(r'[a-z]', password):
+        return False
+    if not re.search(r'\d', password):
+        return False
+    return True
+
+
 # ==================== HEALTH CHECK ====================
 @app.route('/api/health', methods=['GET'])
 def health_check():
@@ -39,6 +69,439 @@ def health_check():
         'message': 'Resume Builder API is running',
         'timestamp': datetime.now().isoformat()
     })
+
+
+# ==================== AUTHENTICATION ENDPOINTS ====================
+
+@app.route('/api/auth/check-availability', methods=['POST'])
+def check_availability():
+    """
+    Check if username/email/phone is available
+    POST /api/auth/check-availability
+    Body: {"field": "username/email/phone", "value": "..."}
+    """
+    try:
+        data = request.get_json()
+        field = data.get('field')
+        value = data.get('value')
+        
+        if not field or not value:
+            return jsonify({'available': False}), 400
+        
+        conn = Config.get_db_connection()
+        cursor = conn.cursor()
+        
+        # Map field names to database columns
+        field_map = {
+            'username': 'username',
+            'email': 'email',
+            'phone': 'phone'
+        }
+        
+        if field not in field_map:
+            return jsonify({'available': False}), 400
+        
+        db_field = field_map[field]
+        
+        # Check if value exists
+        cursor.execute(f"SELECT COUNT(*) FROM users WHERE {db_field} = ?", (value,))
+        count = cursor.fetchone()[0]
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            'available': count == 0
+        })
+        
+    except Exception as e:
+        print(f"❌ ERROR in check_availability: {str(e)}")
+        return jsonify({'available': False}), 500
+
+
+@app.route('/api/auth/register', methods=['POST'])
+def register():
+    """
+    Register new user
+    POST /api/auth/register
+    Body: {
+        "username": "...",
+        "first_name": "...",
+        "last_name": "...",
+        "email": "...",
+        "phone": "...",
+        "password": "..."
+    }
+    """
+    try:
+        data = request.get_json()
+        
+        # Extract data
+        username = data.get('username', '').strip()
+        first_name = data.get('first_name', '').strip()
+        last_name = data.get('last_name', '').strip()
+        email = data.get('email', '').strip().lower()
+        phone = data.get('phone', '').strip()
+        password = data.get('password', '')
+        
+        # Validate required fields
+        if not all([username, first_name, last_name, email, phone, password]):
+            return jsonify({
+                'success': False,
+                'message': 'All fields are required'
+            }), 400
+        
+        # Validate username length
+        if len(username) < 3 or len(username) > 20:
+            return jsonify({
+                'success': False,
+                'message': 'Username must be 3-20 characters'
+            }), 400
+        
+        # Validate email
+        if not validate_email(email):
+            return jsonify({
+                'success': False,
+                'message': 'Invalid email format'
+            }), 400
+        
+        # Validate phone
+        if not validate_phone(phone):
+            return jsonify({
+                'success': False,
+                'message': 'Phone number must be 10 digits'
+            }), 400
+        
+        # Validate password strength
+        if not validate_password(password):
+            return jsonify({
+                'success': False,
+                'message': 'Password must be at least 8 characters with uppercase, lowercase, and number'
+            }), 400
+        
+        conn = Config.get_db_connection()
+        cursor = conn.cursor()
+        
+        # Check for duplicates
+        cursor.execute("""
+            SELECT 
+                COUNT(CASE WHEN username = ? THEN 1 END) as username_exists,
+                COUNT(CASE WHEN email = ? THEN 1 END) as email_exists,
+                COUNT(CASE WHEN phone = ? THEN 1 END) as phone_exists
+            FROM users
+        """, (username, email, phone))
+        
+        result = cursor.fetchone()
+        
+        if result[0] > 0:
+            cursor.close()
+            conn.close()
+            return jsonify({
+                'success': False,
+                'message': 'Username already taken'
+            }), 400
+        
+        if result[1] > 0:
+            cursor.close()
+            conn.close()
+            return jsonify({
+                'success': False,
+                'message': 'Email already registered'
+            }), 400
+        
+        if result[2] > 0:
+            cursor.close()
+            conn.close()
+            return jsonify({
+                'success': False,
+                'message': 'Phone number already registered'
+            }), 400
+        
+        # Hash password
+        hashed_password = hash_password(password)
+        
+        # Insert user
+        cursor.execute("""
+            INSERT INTO users (username, first_name, last_name, email, phone, password, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, GETDATE())
+        """, (username, first_name, last_name, email, phone, hashed_password))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        print(f"✓ User registered successfully: {username}")
+        
+        return jsonify({
+            'success': True,
+            'message': 'Registration successful'
+        }), 201
+        
+    except Exception as e:
+        print(f"❌ ERROR in register: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'message': 'Registration failed. Please try again.'
+        }), 500
+
+
+@app.route('/api/auth/login', methods=['POST'])
+def login():
+    """
+    Login user
+    POST /api/auth/login
+    Body: {
+        "username": "...",
+        "password": "..."
+    }
+    """
+    try:
+        data = request.get_json()
+        
+        username = data.get('username', '').strip()
+        password = data.get('password', '')
+        
+        if not username or not password:
+            return jsonify({
+                'success': False,
+                'message': 'Username and password are required'
+            }), 400
+        
+        # Hash password
+        hashed_password = hash_password(password)
+        
+        conn = Config.get_db_connection()
+        cursor = conn.cursor()
+        
+        # Check credentials
+        cursor.execute("""
+            SELECT id, username, first_name, last_name, email, phone
+            FROM users
+            WHERE username = ? AND password = ?
+        """, (username, hashed_password))
+        
+        user = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
+        
+        if user:
+            print(f"✓ User logged in successfully: {username}")
+            
+            return jsonify({
+                'success': True,
+                'message': 'Login successful',
+                'user': {
+                    'id': user[0],
+                    'username': user[1],
+                    'first_name': user[2],
+                    'last_name': user[3],
+                    'email': user[4],
+                    'phone': user[5]
+                }
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Invalid username or password'
+            }), 401
+        
+    except Exception as e:
+        print(f"❌ ERROR in login: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'message': 'Login failed. Please try again.'
+        }), 500
+
+
+# ==================== GLOBAL ANALYTICS ====================
+@app.route('/api/analytics', methods=['GET'])
+def get_analytics():
+    """Get total visitor and download counts across all resumes"""
+    try:
+        conn = Config.get_db_connection()
+        cursor = conn.cursor()
+        
+        # Sum all visitor counts and download counts from Resumes table
+        cursor.execute("""
+            SELECT 
+                ISNULL(SUM(VisitorCount), 0) as TotalVisitors,
+                ISNULL(SUM(DownloadCount), 0) as TotalDownloads,
+                MAX(UpdatedDate) as LastUpdated
+            FROM Resumes
+        """)
+        row = cursor.fetchone()
+        
+        if row:
+            total_visitors = row[0]
+            total_downloads = row[1]
+            last_updated = str(row[2]) if row[2] else None
+        else:
+            total_visitors = 0
+            total_downloads = 0
+            last_updated = None
+        
+        cursor.close()
+        conn.close()
+        
+        print(f"✓ Analytics: Visitors={total_visitors}, Downloads={total_downloads}")
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'visitor_count': total_visitors,
+                'download_count': total_downloads,
+                'last_updated': last_updated
+            }
+        })
+        
+    except Exception as e:
+        print(f"❌ ERROR in get_analytics: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'message': str(e)
+        }), 500
+
+
+# ==================== VISITOR COUNT TRACKING ====================
+@app.route('/api/visitor/increment', methods=['POST'])
+def increment_visitor():
+    """
+    Increment visitor count for the most recent resume
+    """
+    try:
+        conn = Config.get_db_connection()
+        cursor = conn.cursor()
+        
+        # Get the most recent resume ID
+        cursor.execute("""
+            SELECT TOP 1 ResumeID 
+            FROM Resumes 
+            ORDER BY CreatedDate DESC
+        """)
+        result = cursor.fetchone()
+        
+        if result:
+            resume_id = result[0]
+            
+            # Increment visitor count for this resume
+            cursor.execute("""
+                UPDATE Resumes 
+                SET VisitorCount = VisitorCount + 1,
+                    UpdatedDate = GETDATE()
+                WHERE ResumeID = ?
+            """, (resume_id,))
+            conn.commit()
+            
+            # Get updated count
+            cursor.execute("SELECT VisitorCount FROM Resumes WHERE ResumeID = ?", (resume_id,))
+            visitor_count = cursor.fetchone()[0]
+            
+            cursor.close()
+            conn.close()
+            
+            print(f"✓ Visitor count incremented for Resume {resume_id} to: {visitor_count}")
+            
+            return jsonify({
+                'success': True,
+                'visitor_count': visitor_count,
+                'resume_id': resume_id,
+                'message': 'Visitor count updated'
+            })
+        else:
+            # No resumes exist yet
+            cursor.close()
+            conn.close()
+            
+            return jsonify({
+                'success': True,
+                'visitor_count': 0,
+                'message': 'No resumes exist yet'
+            })
+        
+    except Exception as e:
+        print(f"❌ ERROR in increment_visitor: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'message': str(e)
+        }), 500
+
+
+# ==================== DOWNLOAD COUNT TRACKING ====================
+@app.route('/api/download/increment', methods=['POST'])
+def increment_download():
+    """
+    Increment download count for a specific resume
+    """
+    try:
+        data = request.get_json() or {}
+        resume_id = data.get('resume_id')
+        
+        conn = Config.get_db_connection()
+        cursor = conn.cursor()
+        
+        # If no resume_id provided, get the most recent one
+        if not resume_id:
+            cursor.execute("""
+                SELECT TOP 1 ResumeID 
+                FROM Resumes 
+                ORDER BY CreatedDate DESC
+            """)
+            result = cursor.fetchone()
+            if result:
+                resume_id = result[0]
+        
+        if resume_id:
+            # Increment download count
+            cursor.execute("""
+                UPDATE Resumes 
+                SET DownloadCount = DownloadCount + 1,
+                    UpdatedDate = GETDATE()
+                WHERE ResumeID = ?
+            """, (resume_id,))
+            conn.commit()
+            
+            # Get updated count
+            cursor.execute("SELECT DownloadCount FROM Resumes WHERE ResumeID = ?", (resume_id,))
+            download_count = cursor.fetchone()[0]
+            
+            cursor.close()
+            conn.close()
+            
+            print(f"✓ Download count incremented for Resume {resume_id} to: {download_count}")
+            
+            return jsonify({
+                'success': True,
+                'download_count': download_count,
+                'resume_id': resume_id,
+                'message': 'Download count updated'
+            })
+        else:
+            cursor.close()
+            conn.close()
+            
+            return jsonify({
+                'success': True,
+                'download_count': 0,
+                'message': 'No resumes exist yet'
+            })
+        
+    except Exception as e:
+        print(f"❌ ERROR in increment_download: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'message': str(e)
+        }), 500
 
 
 # ==================== CHECK DATABASE SCHEMA ====================
@@ -89,9 +552,10 @@ def get_all_resumes():
         conn = Config.get_db_connection()
         cursor = conn.cursor()
         
-        # Get all resumes using correct column names
+        # Get all resumes with visitor and download counts
         cursor.execute("""
-            SELECT ResumeID, ResumeTitle, Status, CreatedDate 
+            SELECT ResumeID, ResumeTitle, Status, CreatedDate, 
+                   VisitorCount, DownloadCount 
             FROM Resumes 
             ORDER BY CreatedDate DESC
         """)
@@ -163,10 +627,10 @@ def get_all_resumes():
                 WHERE ResumeID = ?
             """, (resume_id,))
             education = [{
-                'institution_name': e[0],  # College
-                'university_name': e[1],   # University
-                'course_name': e[2],       # Course
-                'year_of_completion': e[3], # Year
+                'institution_name': e[0],
+                'university_name': e[1],
+                'course_name': e[2],
+                'year_of_completion': e[3],
                 'cgpa': float(e[4]) if e[4] else None
             } for e in cursor.fetchall()]
             
@@ -219,6 +683,8 @@ def get_all_resumes():
                 'resume_title': resume[1] if resume[1] else 'Untitled Resume',
                 'status': resume[2] if len(resume) > 2 else 'Draft',
                 'created_at': str(resume[3]) if resume[3] else None,
+                'visitor_count': resume[4] if len(resume) > 4 else 0,
+                'download_count': resume[5] if len(resume) > 5 else 0,
                 'personal_info': personal_info,
                 'work_experience': work_experience,
                 'education': education,
@@ -248,40 +714,6 @@ def get_all_resumes():
         }), 500
 
 
-# ==================== GET SINGLE RESUME ====================
-@app.route('/api/resume/<int:resume_id>', methods=['GET'])
-def get_resume(resume_id):
-    """Get a single resume by ID"""
-    try:
-        conn = Config.get_db_connection()
-        cursor = conn.cursor()
-        
-        # Get resume basic info
-        cursor.execute("SELECT * FROM Resumes WHERE ResumeID = ?", (resume_id,))
-        resume = cursor.fetchone()
-        
-        if not resume:
-            return jsonify({
-                'success': False,
-                'message': 'Resume not found'
-            }), 404
-        
-        cursor.close()
-        conn.close()
-        
-        return jsonify({
-            'success': True,
-            'data': {}
-        })
-        
-    except Exception as e:
-        print(f"❌ ERROR in get_resume: {str(e)}")
-        return jsonify({
-            'success': False,
-            'message': str(e)
-        }), 500
-
-
 # ==================== CREATE RESUME ====================
 @app.route('/api/resume', methods=['POST'])
 def create_resume():
@@ -298,10 +730,10 @@ def create_resume():
         conn = Config.get_db_connection()
         cursor = conn.cursor()
         
-        # Insert resume
+        # Insert resume with default counts of 0
         cursor.execute("""
-            INSERT INTO Resumes (ResumeTitle, Status, CreatedDate) 
-            VALUES (?, ?, ?)
+            INSERT INTO Resumes (ResumeTitle, Status, VisitorCount, DownloadCount, CreatedDate) 
+            VALUES (?, ?, 0, 0, ?)
         """, (
             data.get('resume_title', 'Untitled Resume'),
             'Draft',
@@ -312,6 +744,8 @@ def create_resume():
         # Get the inserted resume_id
         cursor.execute("SELECT @@IDENTITY")
         resume_id = cursor.fetchone()[0]
+        
+        print(f"✓ Resume created with ID: {resume_id}")
         
         # Insert personal info
         if 'personal_info' in data:
@@ -349,8 +783,8 @@ def create_resume():
                     (ResumeID, College, University, Course, Year, CGPA, CreatedDate) 
                     VALUES (?, ?, ?, ?, ?, ?, ?)
                 """, (
-                    resume_id, edu.get('institution_name'), edu.get('university_name'),
-                    edu.get('course_name'), edu.get('year_of_completion'), 
+                    resume_id, edu.get('college'), edu.get('university'),
+                    edu.get('course'), edu.get('year'), 
                     edu.get('cgpa'), datetime.now()
                 ))
         
@@ -401,6 +835,8 @@ def create_resume():
         cursor.close()
         conn.close()
         
+        print(f"✓ Resume {resume_id} saved successfully")
+        
         return jsonify({
             'success': True,
             'message': 'Resume created successfully',
@@ -421,16 +857,21 @@ if __name__ == '__main__':
     """Run the application"""
     
     print("\n" + "="*50)
-    print("Resume Builder API Server - READY")
+    print("Resume Builder API Server - COMPLETE VERSION")
     print("="*50)
     print("Server running at: http://localhost:5000")
     print("API base URL: http://localhost:5000/api")
     print("\nAvailable endpoints:")
-    print("  GET  /api/health          - Health check")
-    print("  GET  /api/schema          - Check database schema")
-    print("  GET  /api/resumes         - Get all resumes (Dashboard)")
-    print("  GET  /api/resume/<id>     - Get resume by ID")
-    print("  POST /api/resume          - Create new resume")
+    print("  GET  /api/health                     - Health check")
+    print("  POST /api/auth/register              - Register new user")
+    print("  POST /api/auth/login                 - Login user")
+    print("  POST /api/auth/check-availability    - Check username/email/phone")
+    print("  GET  /api/schema                     - Check database schema")
+    print("  GET  /api/resumes                    - Get all resumes")
+    print("  POST /api/resume                     - Create new resume")
+    print("  POST /api/visitor/increment          - Track visitor")
+    print("  POST /api/download/increment         - Track download")
+    print("  GET  /api/analytics                  - Get visitor & download counts")
     print("\nPress CTRL+C to stop the server")
     print("="*50 + "\n")
     

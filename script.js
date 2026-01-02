@@ -18,6 +18,57 @@ let vis = {
 };
 
 let photo = '';
+let currentResumeId = null; // Store the current resume ID
+
+// ==================== TRACKING FUNCTIONS ====================
+
+// Track visitor when page loads
+async function trackVisitor() {
+    try {
+        const response = await fetch('http://localhost:5000/api/visitor/increment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const result = await response.json();
+        if (result.success) {
+            console.log('✓ Visitor tracked. Resume ID:', result.resume_id, 'Count:', result.visitor_count);
+            currentResumeId = result.resume_id; // Store the resume ID
+        }
+    } catch (error) {
+        console.error('Failed to track visitor:', error);
+    }
+}
+
+// Track download when PDF is downloaded
+async function trackDownload() {
+    try {
+        console.log('Tracking download for resume ID:', currentResumeId);
+        
+        const response = await fetch('http://localhost:5000/api/download/increment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                resume_id: currentResumeId 
+            })
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            console.log('✓ Download tracked. Resume ID:', result.resume_id, 'Count:', result.download_count);
+        } else {
+            console.error('Download tracking failed:', result.message);
+        }
+    } catch (error) {
+        console.error('Failed to track download:', error);
+    }
+}
+
+// Track visitor on page load
+window.addEventListener('DOMContentLoaded', () => {
+    trackVisitor();
+});
+
+// ==================== EXISTING FUNCTIONS ====================
 
 // Calculate experience duration
 function calculateExperience(startDate, endDate) {
@@ -641,8 +692,11 @@ function backToForm() {
     updateSection('Form');
 }
 
-// Download PDF
-function downloadPDF() {
+// Download PDF - UPDATED WITH TRACKING
+async function downloadPDF() {
+    // IMPORTANT: Track download BEFORE generating PDF
+    await trackDownload();
+    
     const element = document.getElementById("resumePreview");
     const buttons = element.querySelector(".text-center.mt-4");
 
@@ -686,21 +740,24 @@ function downloadPDF() {
         .set(opt)
         .save()
         .then(() => {
+            console.log('✓ PDF downloaded successfully');
             if (buttons) buttons.style.display = "flex";
         })
         .catch(err => {
-            console.error(err);
+            console.error('PDF download error:', err);
             if (buttons) buttons.style.display = "flex";
         });
 }
 
-// Wrapper function for save button - NEWLY ADDED
+// Wrapper function for save button
 async function saveToDatabase() {
     console.log('Save button clicked!');
     const result = await saveResumeToDatabase();
     
     if (result.success) {
         alert(`✓ Resume saved successfully!\nResume ID: ${result.resume_id}`);
+        // Store the resume ID for download tracking
+        currentResumeId = result.resume_id;
     } else {
         alert(`❌ Failed to save resume:\n${result.message}`);
     }
