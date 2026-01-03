@@ -25,6 +25,29 @@
             margin: 0 auto;
         }
 
+        /* Back Button Styles - Integrated with header buttons */
+        .back-button {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 12px 30px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-button:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
         .dashboard-header {
             background: white;
             padding: 30px;
@@ -384,6 +407,16 @@
                 text-align: center;
             }
 
+            .dashboard-header > div:last-child {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .dashboard-header .back-button,
+            .dashboard-header .btn-action {
+                width: 100%;
+            }
+
             .stats-grid { grid-template-columns: 1fr; }
             .users-grid { grid-template-columns: 1fr; }
             
@@ -395,6 +428,7 @@
     </style>
 </head>
 <body>
+
     <div class="dashboard-container">
         <!-- Header -->
         <div class="dashboard-header">
@@ -403,6 +437,9 @@
                 <p style="color: #666; margin: 8px 0 0 0; font-size: 15px;">Real-time insights from your resume database</p>
             </div>
             <div style="display: flex; gap: 15px;">
+                <a href="home.html" class="back-button">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
                 <button class="btn-action" onclick="goToResumeBuilder()">
                     <i class="fas fa-plus"></i> Create Resume
                 </button>
@@ -412,7 +449,7 @@
             </div>
         </div>
 
-        <!-- Stats Cards - NOW WITH VISITOR & DOWNLOAD COUNTS -->
+        <!-- Stats Cards -->
         <div class="stats-grid">
             <div class="stat-card primary">
                 <div class="stat-icon"><i class="fas fa-users"></i></div>
@@ -434,13 +471,11 @@
                 <div class="stat-number" id="totalSkills">0</div>
                 <div class="stat-label">Total Skills</div>
             </div>
-            <!-- NEW: Visitor Count Card -->
             <div class="stat-card visitor">
                 <div class="stat-icon"><i class="fas fa-eye"></i></div>
                 <div class="stat-number" id="visitorCount">0</div>
                 <div class="stat-label">Total Visitors</div>
             </div>
-            <!-- NEW: Download Count Card -->
             <div class="stat-card download">
                 <div class="stat-icon"><i class="fas fa-download"></i></div>
                 <div class="stat-number" id="downloadCount">0</div>
@@ -448,7 +483,7 @@
             </div>
         </div>
 
-        <!-- NEW: Visitor & Download Analytics Chart -->
+        <!-- Visitor & Download Analytics Chart -->
         <div class="chart-container" style="animation-delay: 0.5s;">
             <div class="chart-header">
                 <h3><i class="fas fa-chart-bar"></i> Visitor & Download Analytics</h3>
@@ -570,76 +605,48 @@
         let charts = {};
         let allData = [];
 
-        // Navigate to resume builder
         function goToResumeBuilder() {
             window.location.href = 'index.html';
         }
 
-        // Fetch resume data from backend
         async function fetchData() {
             try {
-                console.log('Fetching data from:', `${API_BASE}/resumes`);
                 const response = await fetch(`${API_BASE}/resumes`);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const result = await response.json();
-                console.log('Received data:', result);
-                
                 if (result.success) {
                     allData = result.data;
                     return allData;
                 } else {
-                    console.error('Failed to fetch:', result.message);
                     showError('Failed to load data: ' + result.message);
                     return [];
                 }
             } catch (error) {
-                console.error('Error fetching data:', error);
                 showError('Could not connect to server. Make sure Flask is running on http://localhost:5000');
                 return [];
             }
         }
 
-        // NEW: Fetch analytics data (visitor & download counts)
         async function fetchAnalytics() {
             try {
                 const response = await fetch(`${API_BASE}/analytics`);
                 const result = await response.json();
-                
-                if (result.success) {
-                    return result.data;
-                } else {
-                    console.error('Failed to fetch analytics:', result.message);
-                    return { visitor_count: 0, download_count: 0 };
-                }
+                return result.success ? result.data : { visitor_count: 0, download_count: 0 };
             } catch (error) {
-                console.error('Error fetching analytics:', error);
                 return { visitor_count: 0, download_count: 0 };
             }
         }
 
-        // Show error message
         function showError(message) {
-            const container = document.getElementById('usersContainer');
-            container.innerHTML = `
+            document.getElementById('usersContainer').innerHTML = `
                 <div class="error-message">
                     <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 15px;"></i>
                     <h3>Connection Error</h3>
                     <p>${message}</p>
-                    <p style="margin-top: 10px; font-size: 14px;">
-                        <strong>Troubleshooting:</strong><br>
-                        1. Make sure Flask server is running (python app.py)<br>
-                        2. Check that SQL Server is running<br>
-                        3. Verify database connection in config.py
-                    </p>
                 </div>
             `;
         }
 
-        // Calculate statistics
         function calculateStats(data) {
             const stats = {
                 totalResumes: data.length,
@@ -659,11 +666,9 @@
                 stats.totalEducation += resume.education?.length || 0;
                 stats.totalSkills += resume.skills?.length || 0;
 
-                // Locations
                 const loc = resume.personal_info?.location;
                 if (loc && loc !== 'N/A') stats.locations[loc] = (stats.locations[loc] || 0) + 1;
 
-                // Skills
                 resume.skills?.forEach(skill => {
                     if (skill.skill_name) {
                         stats.skills[skill.skill_name] = (stats.skills[skill.skill_name] || 0) + 1;
@@ -673,21 +678,18 @@
                     }
                 });
 
-                // Companies
                 resume.work_experience?.forEach(work => {
                     if (work.company_name) {
                         stats.companies[work.company_name] = (stats.companies[work.company_name] || 0) + 1;
                     }
                 });
 
-                // Universities
                 resume.education?.forEach(edu => {
                     if (edu.institution_name) {
                         stats.universities[edu.institution_name] = (stats.universities[edu.institution_name] || 0) + 1;
                     }
                 });
 
-                // Timeline
                 if (resume.created_at) {
                     const date = new Date(resume.created_at);
                     const month = date.toLocaleString('default', { month: 'short', year: 'numeric' });
@@ -698,7 +700,6 @@
             return stats;
         }
 
-        // Update stat cards with animation
         function updateStats(stats, analytics) {
             animateValue('totalResumes', 0, stats.totalResumes, 1000);
             animateValue('totalWork', 0, stats.totalWork, 1000);
@@ -708,7 +709,6 @@
             animateValue('downloadCount', 0, analytics.download_count, 1000);
         }
 
-        // Animate number counting
         function animateValue(id, start, end, duration) {
             const element = document.getElementById(id);
             const range = end - start;
@@ -725,12 +725,9 @@
             }, 16);
         }
 
-        // NEW: Create Visitor & Download Analytics Chart
         function createAnalyticsChart(analytics) {
             if (charts.analytics) charts.analytics.destroy();
-            
             const ctx = document.getElementById('analyticsChart');
-
             charts.analytics = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -738,14 +735,8 @@
                     datasets: [{
                         label: 'Count',
                         data: [analytics.visitor_count, analytics.download_count],
-                        backgroundColor: [
-                            'rgba(250, 139, 255, 0.8)',
-                            'rgba(249, 119, 148, 0.8)'
-                        ],
-                        borderColor: [
-                            'rgba(250, 139, 255, 1)',
-                            'rgba(249, 119, 148, 1)'
-                        ],
+                        backgroundColor: ['rgba(250, 139, 255, 0.8)', 'rgba(249, 119, 148, 0.8)'],
+                        borderColor: ['rgba(250, 139, 255, 1)', 'rgba(249, 119, 148, 1)'],
                         borderWidth: 2,
                         borderRadius: 10
                     }]
@@ -753,39 +744,17 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return context.label + ': ' + context.parsed.y.toLocaleString();
-                                }
-                            }
-                        }
-                    },
-                    scales: { 
-                        y: { 
-                            beginAtZero: true, 
-                            ticks: { stepSize: Math.max(1, Math.ceil(Math.max(analytics.visitor_count, analytics.download_count) / 10)) }
-                        } 
-                    }
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
                 }
             });
         }
 
-        // Create location chart
         function createLocationChart(locations) {
             if (charts.location) charts.location.destroy();
-            
             const sorted = Object.entries(locations).sort((a, b) => b[1] - a[1]).slice(0, 10);
-            
-            if (sorted.length === 0) {
-                document.getElementById('locationChart').parentElement.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">No location data available</p>';
-                return;
-            }
-            
+            if (sorted.length === 0) return;
             const ctx = document.getElementById('locationChart');
-
             charts.location = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -807,19 +776,11 @@
             });
         }
 
-        // Create skills chart
         function createSkillsChart(skills) {
             if (charts.skills) charts.skills.destroy();
-            
             const sorted = Object.entries(skills).sort((a, b) => b[1] - a[1]).slice(0, 10);
-            
-            if (sorted.length === 0) {
-                document.getElementById('skillsChart').parentElement.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">No skills data available</p>';
-                return;
-            }
-            
+            if (sorted.length === 0) return;
             const ctx = document.getElementById('skillsChart');
-
             charts.skills = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -842,19 +803,11 @@
             });
         }
 
-        // Create timeline chart
         function createTimelineChart(timeline) {
             if (charts.timeline) charts.timeline.destroy();
-            
             const sorted = Object.entries(timeline);
-            
-            if (sorted.length === 0) {
-                document.getElementById('timelineChart').parentElement.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">No timeline data available</p>';
-                return;
-            }
-            
+            if (sorted.length === 0) return;
             const ctx = document.getElementById('timelineChart');
-
             charts.timeline = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -881,30 +834,18 @@
             });
         }
 
-        // Create category chart
         function createCategoryChart(categories) {
             if (charts.category) charts.category.destroy();
-            
             const total = Object.values(categories).reduce((a, b) => a + b, 0);
-            
-            if (total === 0) {
-                document.getElementById('categoryChart').parentElement.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">No category data available</p>';
-                return;
-            }
-            
+            if (total === 0) return;
             const ctx = document.getElementById('categoryChart');
-
             charts.category = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: Object.keys(categories),
                     datasets: [{
                         data: Object.values(categories),
-                        backgroundColor: [
-                            'rgba(102, 126, 234, 0.9)',
-                            'rgba(86, 171, 47, 0.9)',
-                            'rgba(240, 147, 251, 0.9)'
-                        ],
+                        backgroundColor: ['rgba(102, 126, 234, 0.9)', 'rgba(86, 171, 47, 0.9)', 'rgba(240, 147, 251, 0.9)'],
                         borderWidth: 4,
                         borderColor: '#fff'
                     }]
@@ -916,19 +857,11 @@
             });
         }
 
-        // Create companies chart
         function createCompaniesChart(companies) {
             if (charts.companies) charts.companies.destroy();
-            
             const sorted = Object.entries(companies).sort((a, b) => b[1] - a[1]).slice(0, 8);
-            
-            if (sorted.length === 0) {
-                document.getElementById('companiesChart').parentElement.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">No company data available</p>';
-                return;
-            }
-            
+            if (sorted.length === 0) return;
             const ctx = document.getElementById('companiesChart');
-
             charts.companies = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -951,19 +884,11 @@
             });
         }
 
-        // Create universities chart
         function createUniversitiesChart(universities) {
             if (charts.universities) charts.universities.destroy();
-            
             const sorted = Object.entries(universities).sort((a, b) => b[1] - a[1]).slice(0, 8);
-            
-            if (sorted.length === 0) {
-                document.getElementById('universitiesChart').parentElement.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">No university data available</p>';
-                return;
-            }
-            
+            if (sorted.length === 0) return;
             const ctx = document.getElementById('universitiesChart');
-
             charts.universities = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -986,76 +911,28 @@
             });
         }
 
-        // Display user cards
         function displayUsers(data) {
             const container = document.getElementById('usersContainer');
-            
             if (data.length === 0) {
-                container.innerHTML = `
-                    <div class="no-data">
-                        <i class="fas fa-folder-open"></i>
-                        <h3>No Resumes Found</h3>
-                        <p>Create your first resume to see it here!</p>
-                    </div>
-                `;
+                container.innerHTML = '<div class="no-data"><i class="fas fa-folder-open"></i><h3>No Resumes Found</h3></div>';
                 return;
             }
-
             const recentData = data.slice(0, 6);
             container.innerHTML = `<div class="users-grid">${recentData.map(resume => {
                 const name = resume.personal_info?.full_name || 'Unknown';
                 const email = resume.personal_info?.email || 'No email';
                 const location = resume.personal_info?.location || 'N/A';
                 const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-                
-                return `
-                    <div class="user-card">
-                        <div style="display: flex; align-items: center; margin-bottom: 20px;">
-                            <div class="user-avatar">${initials}</div>
-                            <div>
-                                <div class="user-name">${name}</div>
-                                <div class="user-email"><i class="fas fa-envelope"></i> ${email}</div>
-                            </div>
-                        </div>
-                        <div style="background: white; padding: 15px; border-radius: 10px;">
-                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
-                                <span style="color: #666; font-size: 14px;"><i class="fas fa-map-marker-alt"></i> Location</span>
-                                <span style="color: #333; font-weight: 600; font-size: 14px;">${location}</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
-                                <span style="color: #666; font-size: 14px;"><i class="fas fa-briefcase"></i> Experience</span>
-                                <span style="color: #333; font-weight: 600; font-size: 14px;">${resume.work_experience?.length || 0}</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
-                                <span style="color: #666; font-size: 14px;"><i class="fas fa-graduation-cap"></i> Education</span>
-                                <span style="color: #333; font-weight: 600; font-size: 14px;">${resume.education?.length || 0}</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; padding: 8px 0;">
-                                <span style="color: #666; font-size: 14px;"><i class="fas fa-tools"></i> Skills</span>
-                                <span style="color: #333; font-weight: 600; font-size: 14px;">${resume.skills?.length || 0}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                return `<div class="user-card"><div style="display: flex; align-items: center; margin-bottom: 20px;"><div class="user-avatar">${initials}</div><div><div class="user-name">${name}</div><div class="user-email"><i class="fas fa-envelope"></i> ${email}</div></div></div><div style="background: white; padding: 15px; border-radius: 10px;"><div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0;"><span style="color: #666; font-size: 14px;"><i class="fas fa-map-marker-alt"></i> Location</span><span style="color: #333; font-weight: 600; font-size: 14px;">${location}</span></div><div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0;"><span style="color: #666; font-size: 14px;"><i class="fas fa-briefcase"></i> Experience</span><span style="color: #333; font-weight: 600; font-size: 14px;">${resume.work_experience?.length || 0}</span></div><div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0;"><span style="color: #666; font-size: 14px;"><i class="fas fa-graduation-cap"></i> Education</span><span style="color: #333; font-weight: 600; font-size: 14px;">${resume.education?.length || 0}</span></div><div style="display: flex; justify-content: space-between; padding: 8px 0;"><span style="color: #666; font-size: 14px;"><i class="fas fa-tools"></i> Skills</span><span style="color: #333; font-weight: 600; font-size: 14px;">${resume.skills?.length || 0}</span></div></div></div>`;
             }).join('')}</div>`;
         }
 
-        // Display data table
         function displayTable(data) {
             const tbody = document.getElementById('tableBody');
-            
             if (data.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="7" style="text-align: center; padding: 60px;">
-                            <i class="fas fa-folder-open" style="font-size: 60px; color: #ddd;"></i>
-                            <p style="margin-top: 20px; color: #666; font-size: 18px;">No resumes found</p>
-                        </td>
-                    </tr>
-                `;
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 60px;"><i class="fas fa-folder-open" style="font-size: 60px; color: #ddd;"></i><p style="margin-top: 20px; color: #666; font-size: 18px;">No resumes found</p></td></tr>';
                 return;
             }
-
             tbody.innerHTML = data.map(resume => {
                 const name = resume.personal_info?.full_name || 'Unknown';
                 const email = resume.personal_info?.email || 'No email';
@@ -1065,65 +942,30 @@
                 const projects = resume.projects?.length || 0;
                 const skillsCount = resume.skills?.length || 0;
                 const topSkills = resume.skills?.slice(0, 3).map(s => s.skill_name).join(', ') || 'None';
-                
-                return `
-                    <tr>
-                        <td style="font-weight: 600; color: #333;">${name}</td>
-                        <td style="color: #666;">${email}</td>
-                        <td><span class="badge badge-info">${location}</span></td>
-                        <td><span class="badge badge-primary">${workExp}</span></td>
-                        <td><span class="badge badge-success">${education}</span></td>
-                        <td style="color: #666;">${skillsCount > 0 ? `${topSkills}${skillsCount > 3 ? '...' : ''}` : 'None'}</td>
-                        <td><span class="badge badge-primary">${projects}</span></td>
-                    </tr>
-                `;
+                return `<tr><td style="font-weight: 600; color: #333;">${name}</td><td style="color: #666;">${email}</td><td><span class="badge badge-info">${location}</span></td><td><span class="badge badge-primary">${workExp}</span></td><td><span class="badge badge-success">${education}</span></td><td style="color: #666;">${skillsCount > 0 ? `${topSkills}${skillsCount > 3 ? '...' : ''}` : 'None'}</td><td><span class="badge badge-primary">${projects}</span></td></tr>`;
             }).join('');
         }
 
-        // Search functionality
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('searchInput');
-            
             searchInput.addEventListener('input', function(e) {
                 const searchTerm = e.target.value.toLowerCase();
-                
                 const filtered = allData.filter(resume => {
                     const name = (resume.personal_info?.full_name || '').toLowerCase();
                     const email = (resume.personal_info?.email || '').toLowerCase();
                     const location = (resume.personal_info?.location || '').toLowerCase();
                     const skills = resume.skills?.map(s => s.skill_name.toLowerCase()).join(' ') || '';
-                    
-                    return name.includes(searchTerm) || 
-                           email.includes(searchTerm) || 
-                           location.includes(searchTerm) ||
-                           skills.includes(searchTerm);
+                    return name.includes(searchTerm) || email.includes(searchTerm) || location.includes(searchTerm) || skills.includes(searchTerm);
                 });
-                
                 displayTable(filtered);
             });
         });
 
-        // Load dashboard
         async function loadDashboard() {
-            console.log('Loading dashboard...');
             document.getElementById('usersContainer').innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i><p>Loading resume data...</p></div>';
-            
-            // Fetch both resume data and analytics
-            const [data, analytics] = await Promise.all([
-                fetchData(),
-                fetchAnalytics()
-            ]);
-            
-            if (data.length === 0 && analytics.visitor_count === 0) {
-                console.log('No data received');
-                return;
-            }
-            
-            console.log('Processing', data.length, 'resumes');
-            console.log('Analytics:', analytics);
-            
+            const [data, analytics] = await Promise.all([fetchData(), fetchAnalytics()]);
+            if (data.length === 0 && analytics.visitor_count === 0) return;
             const stats = calculateStats(data);
-
             updateStats(stats, analytics);
             createAnalyticsChart(analytics);
             createLocationChart(stats.locations);
@@ -1134,13 +976,9 @@
             createUniversitiesChart(stats.universities);
             displayUsers(data);
             displayTable(data);
-            
-            console.log('Dashboard loaded successfully');
         }
 
-        // Load on page load
         window.addEventListener('DOMContentLoaded', loadDashboard);
-        
     </script>
 </body>
 </html>
