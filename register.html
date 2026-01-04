@@ -67,7 +67,7 @@
             font-size: 14px;
         }
 
-        .form-control {
+        .form-control, .form-select {
             border: 2px solid #e0e0e0;
             border-radius: 10px;
             padding: 12px 15px;
@@ -75,16 +75,16 @@
             transition: all 0.3s ease;
         }
 
-        .form-control:focus {
+        .form-control:focus, .form-select:focus {
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        .form-control.is-invalid {
+        .form-control.is-invalid, .form-select.is-invalid {
             border-color: #dc3545;
         }
 
-        .form-control.is-valid {
+        .form-control.is-valid, .form-select.is-valid {
             border-color: #28a745;
         }
 
@@ -95,7 +95,7 @@
             color: #667eea;
         }
 
-        .input-group .form-control {
+        .input-group .form-control, .input-group .form-select {
             border-left: none;
         }
 
@@ -199,6 +199,31 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .role-info {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #666;
+            display: none;
+        }
+
+        .role-info.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .role-info i {
+            margin-right: 8px;
+            color: #667eea;
+        }
     </style>
 </head>
 <body>
@@ -217,6 +242,21 @@
             <div id="alertContainer"></div>
 
             <form id="registerForm" novalidate>
+                <div class="mb-3">
+                    <label class="form-label">Account Type *</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-user-tag"></i></span>
+                        <select class="form-select" id="userType" required>
+                            <option value="" selected disabled>Select account type</option>
+                            <option value="candidate">Candidate - Build and manage resumes</option>
+                            <option value="recruiter">Recruiter - Post jobs and review applications</option>
+                            <option value="admin">Admin - Full system access</option>
+                        </select>
+                        <div class="invalid-feedback">Please select an account type.</div>
+                    </div>
+                    <div class="role-info" id="roleInfo"></div>
+                </div>
+
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label">First Name *</label>
@@ -305,6 +345,7 @@
 
         // Form elements
         const form = document.getElementById('registerForm');
+        const userType = document.getElementById('userType');
         const firstName = document.getElementById('firstName');
         const lastName = document.getElementById('lastName');
         const username = document.getElementById('username');
@@ -315,6 +356,24 @@
         const registerBtn = document.getElementById('registerBtn');
         const alertContainer = document.getElementById('alertContainer');
         const loadingOverlay = document.getElementById('loadingOverlay');
+        const roleInfo = document.getElementById('roleInfo');
+
+        // Role information
+        const roleDescriptions = {
+            candidate: '<i class="fas fa-user"></i> Build resumes and apply for jobs',
+            recruiter: '<i class="fas fa-briefcase"></i> Post job openings and review candidates',
+            admin: '<i class="fas fa-shield-alt"></i> Full access to system management'
+        };
+
+        // Show role description when user selects account type
+        userType.addEventListener('change', function() {
+            if (this.value && roleDescriptions[this.value]) {
+                roleInfo.innerHTML = roleDescriptions[this.value];
+                roleInfo.classList.add('show');
+            } else {
+                roleInfo.classList.remove('show');
+            }
+        });
 
         // Toggle password visibility
         document.getElementById('togglePassword').addEventListener('click', function() {
@@ -429,6 +488,12 @@
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
 
+            // Validate account type
+            if (!userType.value) {
+                showAlert('Please select an account type.');
+                return;
+            }
+
             // Validate form
             if (!form.checkValidity()) {
                 e.stopPropagation();
@@ -465,7 +530,8 @@
                         last_name: lastName.value.trim(),
                         email: email.value.trim(),
                         phone: phone.value.trim(),
-                        password: password.value
+                        password: password.value,
+                        type: userType.value
                     })
                 });
 

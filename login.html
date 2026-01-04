@@ -72,7 +72,7 @@
             font-size: 14px;
         }
 
-        .form-control {
+        .form-control, .form-select {
             border: 2px solid #e0e0e0;
             border-radius: 10px;
             padding: 12px 15px;
@@ -80,7 +80,7 @@
             transition: all 0.3s ease;
         }
 
-        .form-control:focus {
+        .form-control:focus, .form-select:focus {
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
@@ -92,7 +92,7 @@
             color: #667eea;
         }
 
-        .input-group .form-control {
+        .input-group .form-control, .input-group .form-select {
             border-left: none;
         }
 
@@ -185,6 +185,31 @@
             background-color: #667eea;
             border-color: #667eea;
         }
+
+        .role-info {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #666;
+            display: none;
+        }
+
+        .role-info.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .role-info i {
+            margin-right: 8px;
+            color: #667eea;
+        }
     </style>
 </head>
 <body>
@@ -203,6 +228,20 @@
             <div id="alertContainer"></div>
 
             <form id="loginForm">
+                <div class="mb-3">
+                    <label class="form-label">Account Type</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-user-tag"></i></span>
+                        <select class="form-select" id="userType" required>
+                            <option value="" selected disabled>Select account type</option>
+                            <option value="candidate">Candidate</option>
+                            <option value="recruiter">Recruiter</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="role-info" id="roleInfo"></div>
+                </div>
+
                 <div class="mb-3">
                     <label class="form-label">Username</label>
                     <div class="input-group">
@@ -244,11 +283,30 @@
         const API_BASE = 'http://localhost:5000/api';
 
         const form = document.getElementById('loginForm');
+        const userType = document.getElementById('userType');
         const username = document.getElementById('username');
         const password = document.getElementById('password');
         const loginBtn = document.getElementById('loginBtn');
         const alertContainer = document.getElementById('alertContainer');
         const loadingOverlay = document.getElementById('loadingOverlay');
+        const roleInfo = document.getElementById('roleInfo');
+
+        // Role information
+        const roleDescriptions = {
+            candidate: '<i class="fas fa-user"></i> Access your resume dashboard and track your applications',
+            recruiter: '<i class="fas fa-briefcase"></i> Manage job postings and review candidate resumes',
+            admin: '<i class="fas fa-shield-alt"></i> Full access to all system features and analytics'
+        };
+
+        // Show role description when user selects account type
+        userType.addEventListener('change', function() {
+            if (this.value && roleDescriptions[this.value]) {
+                roleInfo.innerHTML = roleDescriptions[this.value];
+                roleInfo.classList.add('show');
+            } else {
+                roleInfo.classList.remove('show');
+            }
+        });
 
         // Toggle password visibility
         document.getElementById('togglePassword').addEventListener('click', function() {
@@ -273,16 +331,33 @@
         window.addEventListener('DOMContentLoaded', () => {
             const user = sessionStorage.getItem('user');
             if (user) {
-                window.location.href = 'home.html';
+                try {
+                    const userData = JSON.parse(user);
+                    redirectBasedOnRole(userData.type);
+                } catch (e) {
+                    sessionStorage.clear();
+                }
             }
         });
+
+        // Redirect based on user role
+        function redirectBasedOnRole(userType) {
+            const redirectMap = {
+                'candidate': 'dashboard.html',
+                'recruiter': 'jobdashboard.html',
+                'admin': 'home.html'
+            };
+            
+            const redirectUrl = redirectMap[userType] || 'home.html';
+            window.location.href = redirectUrl;
+        }
 
         // Form submission
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            if (!username.value.trim() || !password.value.trim()) {
-                showAlert('Please enter both username and password.');
+            if (!userType.value || !username.value.trim() || !password.value.trim()) {
+                showAlert('Please fill in all fields.');
                 return;
             }
 
@@ -295,7 +370,8 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         username: username.value.trim(),
-                        password: password.value
+                        password: password.value,
+                        type: userType.value
                     })
                 });
 
@@ -305,14 +381,15 @@
                     // Store user data in sessionStorage
                     sessionStorage.setItem('user', JSON.stringify(result.user));
                     sessionStorage.setItem('userId', result.user.id);
+                    sessionStorage.setItem('userType', result.user.type);
                     
                     showAlert('Login successful! Redirecting...', 'success');
                     
                     setTimeout(() => {
-                        window.location.href = 'home.html';
+                        redirectBasedOnRole(result.user.type);
                     }, 1000);
                 } else {
-                    showAlert(result.message || 'Invalid username or password.');
+                    showAlert(result.message || 'Invalid credentials or account type.');
                     loginBtn.disabled = false;
                 }
             } catch (error) {

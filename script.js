@@ -1,3 +1,107 @@
+// Get user data from session
+function getUserData() {
+    const user = sessionStorage.getItem('user');
+    if (user) {
+        try {
+            return JSON.parse(user);
+        } catch (e) {
+            return null;
+        }
+    }
+    return null;
+}
+
+// Initialize user display in header
+function initializeUserDisplay() {
+    const userData = getUserData();
+    
+    if (!userData) {
+        // Redirect to login if no user data
+        window.location.href = 'login.html';
+        return;
+    }
+
+    const fullName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim();
+    const displayName = fullName || userData.username || 'User';
+    const email = userData.email || 'user@email.com';
+
+    let initials = 'U';
+    if (fullName) {
+        initials = fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    } else if (userData.username) {
+        initials = userData.username[0].toUpperCase();
+    }
+
+    document.getElementById('headerAvatar').textContent = initials;
+    document.getElementById('headerUserName').textContent = displayName;
+    document.getElementById('dropdownAvatar').textContent = initials;
+    document.getElementById('dropdownUserName').textContent = displayName;
+    document.getElementById('dropdownUserEmail').textContent = email;
+}
+
+// Toggle dropdown menu
+function toggleDropdown() {
+    document.getElementById('userDropdown').classList.toggle('show');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('userDropdown');
+    const trigger = document.querySelector('.profile-trigger');
+    
+    if (trigger && !trigger.contains(event.target) && !dropdown.contains(event.target)) {
+        dropdown.classList.remove('show');
+    }
+});
+
+// Open settings modal
+function openSettings() {
+    document.getElementById('settingsModal').classList.add('show');
+    toggleDropdown();
+}
+
+// Close settings modal
+function closeSettings() {
+    document.getElementById('settingsModal').classList.remove('show');
+}
+
+// Close modal when clicking outside
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('settingsModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeSettings();
+            }
+        });
+    }
+});
+
+// Toggle setting switch
+function toggleSetting(element) {
+    element.classList.toggle('active');
+    const settingTitle = element.parentElement.querySelector('.setting-title').textContent.trim();
+    const isActive = element.classList.contains('active');
+    localStorage.setItem('setting_' + settingTitle.replace(/\s+/g, '_'), isActive);
+}
+
+// Switch account
+function switchAccount() {
+    if (confirm('Are you sure you want to switch accounts? This will log you out.')) {
+        sessionStorage.clear();
+        window.location.href = 'login.html';
+    }
+}
+
+// Logout
+function logout() {
+    if (confirm('Are you sure you want to logout?')) {
+        sessionStorage.clear();
+        window.location.href = 'login.html';
+    }
+}
+
+
 // Global state
 let counts = {
     work: 0,
@@ -695,6 +799,7 @@ function backToForm() {
 // Download PDF - UPDATED WITH TRACKING
 async function downloadPDF() {
     // IMPORTANT: Track download BEFORE generating PDF
+    
     await trackDownload();
     
     const element = document.getElementById("resumePreview");

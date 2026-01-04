@@ -7,9 +7,168 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-
 </head>
 <body>
+    <!-- Application Header -->
+    <header class="app-header">
+        <div class="header-left">
+            <a href="home.html" class="brand-logo">
+                <div class="brand-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <span class="brand-text">Resume Builder</span>
+            </a>
+            <a href="dashboard.html" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                Back to Dashboard
+            </a>
+        </div>
+
+        <div class="header-right">
+            <div class="user-profile">
+                <div class="profile-trigger" onclick="toggleDropdown()">
+                    <div class="user-avatar" id="headerAvatar">U</div>
+                    <span class="user-name" id="headerUserName">User</span>
+                    <i class="fas fa-chevron-down dropdown-arrow"></i>
+                </div>
+
+                <div class="dropdown-menu-custom" id="userDropdown">
+                    <div class="dropdown-header">
+                        <div class="dropdown-header-content">
+                            <div class="dropdown-avatar" id="dropdownAvatar">U</div>
+                            <div class="dropdown-user-info">
+                                <div class="dropdown-user-name" id="dropdownUserName">User Name</div>
+                                <div class="dropdown-user-email" id="dropdownUserEmail">user@email.com</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dropdown-body">
+                        <a href="profile.html" class="dropdown-item-custom">
+                            <i class="fas fa-user"></i>
+                            <span>My Profile</span>
+                        </a>
+                        
+                        <a href="dashboard.html" class="dropdown-item-custom">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Dashboard</span>
+                        </a>
+
+                        <div class="dropdown-item-custom" onclick="openSettings()">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </div>
+
+                        <div class="dropdown-divider-custom"></div>
+
+                        <div class="dropdown-item-custom" onclick="switchAccount()">
+                            <i class="fas fa-exchange-alt"></i>
+                            <span>Switch Account</span>
+                        </div>
+
+                        <div class="dropdown-divider-custom"></div>
+
+                        <div class="dropdown-item-custom danger" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="settings-modal">
+            <div class="modal-header-custom">
+                <div class="modal-title">
+                    <i class="fas fa-cog"></i>
+                    Settings
+                </div>
+                <button class="modal-close" onclick="closeSettings()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-item">
+                    <div class="setting-header">
+                        <div class="setting-title">
+                            <i class="fas fa-bell"></i>
+                            Email Notifications
+                        </div>
+                        <div class="toggle-switch" onclick="toggleSetting(this)">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    <div class="setting-description">
+                        Receive email notifications about your resume activity
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-header">
+                        <div class="setting-title">
+                            <i class="fas fa-moon"></i>
+                            Dark Mode
+                        </div>
+                        <div class="toggle-switch" onclick="toggleSetting(this)">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    <div class="setting-description">
+                        Switch to dark theme for better viewing at night
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-header">
+                        <div class="setting-title">
+                            <i class="fas fa-save"></i>
+                            Auto-Save
+                        </div>
+                        <div class="toggle-switch active" onclick="toggleSetting(this)">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    <div class="setting-description">
+                        Automatically save your resume progress
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-header">
+                        <div class="setting-title">
+                            <i class="fas fa-shield-alt"></i>
+                            Privacy Mode
+                        </div>
+                        <div class="toggle-switch" onclick="toggleSetting(this)">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    <div class="setting-description">
+                        Hide your resume from public search results
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-header">
+                        <div class="setting-title">
+                            <i class="fas fa-chart-line"></i>
+                            Analytics
+                        </div>
+                        <div class="toggle-switch active" onclick="toggleSetting(this)">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                    <div class="setting-description">
+                        Track resume views and download statistics
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container-main" id="formSection">
         <h1><i class="fas fa-file-alt"></i> Professional Resume Builder</h1>
 
@@ -22,49 +181,49 @@
             <h3 class="section-title"><i class="fas fa-user"></i> Personal Information</h3>
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label class="form-label"> Name * <i class="fas fa-question-circle help-icon" title="Enter your complete full name as you want it to appear on your resume (e.g., John Michael Smith)"></i></label>
+                    <label class="form-label">Full Name * <i class="fas fa-question-circle help-icon" title="Enter your complete full name as you want it to appear on your resume"></i></label>
                     <input type="text" class="form-control" id="fullName" required tabindex="1">
                     <div class="error-message" id="fullName-error"></div>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Email  * <i class="fas fa-question-circle help-icon" title="Enter a professional email address that you check regularly. Example: yourname@email.com"></i></label>
+                    <label class="form-label">Email * <i class="fas fa-question-circle help-icon" title="Enter a professional email address"></i></label>
                     <input type="email" class="form-control" id="email" required tabindex="2">
                     <div class="error-message" id="email-error"></div>
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label class="form-label">Date of Birth * <i class="fas fa-question-circle help-icon" title="Select your date of birth. You must be between 18-100 years old to create a resume."></i></label>
+                    <label class="form-label">Date of Birth * <i class="fas fa-question-circle help-icon" title="Select your date of birth"></i></label>
                     <input type="date" class="form-control" id="dob" required tabindex="3">
                     <div class="age-info">Age must be 18-100 years</div>
                     <div class="error-message" id="dob-error"></div>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Phone * <i class="fas fa-question-circle help-icon" title="Enter your 10-digit mobile number without country code or spaces. Example: 9876543210"></i></label>
+                    <label class="form-label">Phone * <i class="fas fa-question-circle help-icon" title="Enter your 10-digit mobile number"></i></label>
                     <input type="tel" class="form-control" id="phone" maxlength="10" required tabindex="4">
                     <div class="error-message" id="phone-error"></div>
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label class="form-label">LinkedIn <i class="fas fa-question-circle help-icon" title="Enter your LinkedIn profile URL. Must start with https:// and contain linkedin.com. Example: https://linkedin.com/in/yourprofile"></i></label>
+                    <label class="form-label">LinkedIn <i class="fas fa-question-circle help-icon" title="Enter your LinkedIn profile URL"></i></label>
                     <input type="url" class="form-control" id="linkedin" tabindex="5" placeholder="https://linkedin.com/in/username">
                     <div class="error-message" id="linkedin-error"></div>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">GitHub/Portfolio <i class="fas fa-question-circle help-icon" title="Enter your GitHub profile or portfolio website URL. Must start with https://. Example: https://github.com/username"></i></label>
+                    <label class="form-label">GitHub/Portfolio <i class="fas fa-question-circle help-icon" title="Enter your GitHub profile or portfolio website URL"></i></label>
                     <input type="url" class="form-control" id="social" tabindex="6" placeholder="https://github.com/username">
                     <div class="error-message" id="social-error"></div>
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label class="form-label">Location * <i class="fas fa-question-circle help-icon" title="Enter your city and country. Example: New York, USA or Mumbai, India"></i></label>
+                    <label class="form-label">Location * <i class="fas fa-question-circle help-icon" title="Enter your city and country"></i></label>
                     <input type="text" class="form-control" id="location" required tabindex="7">
                     <div class="error-message" id="location-error"></div>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Photo <i class="fas fa-question-circle help-icon" title="Upload a professional photo (passport size recommended). Supported formats: JPG, PNG. Optional but recommended for a complete resume."></i></label>
+                    <label class="form-label">Photo <i class="fas fa-question-circle help-icon" title="Upload a professional photo"></i></label>
                     <input type="file" class="form-control" id="photo" accept="image/*" tabindex="8">
                     <div class="form-check mt-2">
                         <input class="form-check-input" type="checkbox" id="showPhotoInResume" checked>
@@ -73,7 +232,7 @@
                 </div>
             </div>
             <div class="mb-3">
-                <label class="form-label">Objective * <i class="fas fa-question-circle help-icon" title="Write a brief career objective or summary (2-3 sentences). Describe your career goals and what you bring to the table. Example: 'Seeking a challenging position in software development where I can utilize my programming skills...'"></i></label>
+                <label class="form-label">Objective * <i class="fas fa-question-circle help-icon" title="Write a brief career objective"></i></label>
                 <textarea class="form-control" id="objective" required tabindex="9"></textarea>
                 <div class="error-message" id="objective-error"></div>
             </div>
@@ -126,24 +285,27 @@
         <div class="section">
             <h3 class="section-title"><i class="fas fa-signature"></i> Declaration</h3>
             <p>I declare all information is true and correct.</p>
-            <label class="form-label">Signature * <i class="fas fa-question-circle help-icon" title="Type your full name as a digital signature. This will appear at the end of your resume to authenticate the document."></i></label>
+            <label class="form-label">Signature * <i class="fas fa-question-circle help-icon" title="Type your full name as a digital signature"></i></label>
             <input type="text" class="form-control" id="signature" required>
             <div class="error-message" id="signature-error"></div>
         </div>
 
-        <div class="text-center mt-4">
-            <button class="btn btn-primary" onclick="previewResume()"><i class="fas fa-eye"></i> Preview Resume</button>
-            <button class="btn btn-warning" onclick="saveToDatabase()">Save to Database</button>
-               <a href="dashboard.html" class="btn btn-dashboard">
-  📊 View Dashboard
-    </a>
-
+        <div class="button-container">
+            <button class="btn-styled btn-primary" onclick="previewResume()">
+                <i class="fas fa-eye"></i> Preview Resume
+            </button>
+            <button class="btn-styled btn-warning" onclick="saveToDatabase()">
+                <i class="fas fa-save"></i> Save to Database
+            </button>
+            <a href="dashboard.html" class="btn-styled btn-dashboard">
+                <i class="fas fa-chart-line"></i> View Dashboard
+            </a>
         </div>
     </div>
 
     <div id="resumePreview">
         <div class="resume-header">
-            <div class="header-left">
+            <div class="header-left-resume">
                 <h1 class="resume-name" id="resumeName"></h1>
                 <div class="resume-location" id="resumeLocation"></div>
             </div>
@@ -229,9 +391,13 @@
             <p class="mt-3"><strong>Signature:</strong> <span id="resumeSig"></span></p>
         </div>
         
-        <div class="text-center mt-4">
-            <button class="btn btn-success me-2" onclick="downloadPDF()"><i class="fas fa-download"></i> Download PDF</button>
-            <button class="btn btn-primary" onclick="backToForm()"><i class="fas fa-edit"></i> Edit</button>
+        <div class="button-container">
+            <button class="btn-styled btn-success" onclick="downloadPDF()">
+                <i class="fas fa-download"></i> Download PDF
+            </button>
+            <button class="btn-styled btn-primary" onclick="backToForm()">
+                <i class="fas fa-edit"></i> Edit Resume
+            </button>
         </div>
     </div>
 
@@ -240,6 +406,5 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="api.js"></script>
     <script src="script.js"></script>
-    
 </body>
 </html>
