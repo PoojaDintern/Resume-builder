@@ -597,7 +597,7 @@
             font-size: 20px;
         }
 
-        /* New Skills List Styles */
+        /* Skills List Styles */
         .skill-input-container {
             display: flex;
             gap: 10px;
@@ -740,7 +740,7 @@
             <div class="brand-icon">
                 <i class="fas fa-file-alt"></i>
             </div>
-            <span class="brand-text">Resume Builder</span>
+            <span class="brand-text">Job Portal</span>
         </a>
         <a href="jobdashboard.html" class="back-button">
             <i class="fas fa-arrow-left"></i>
@@ -956,12 +956,48 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>
+                        <i class="fas fa-industry"></i>
+                        Sector<span class="required">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="sector" placeholder="e.g., Information Technology, Healthcare, Finance" required>
+                </div>
+
+                <div class="form-group">
+                    <label>
                         <i class="fas fa-money-bill-wave"></i>
                         Package (Annual)<span class="required">*</span>
                     </label>
                     <input type="text" class="form-control" id="package" placeholder="e.g., $80,000 - $120,000" required>
                 </div>
+            </div>
 
+            <div class="form-row">
+                <div class="form-group">
+                    <label>
+                        <i class="fas fa-globe"></i>
+                        Country<span class="required">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="country" placeholder="e.g., United States" required>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <i class="fas fa-map-marker-alt"></i>
+                        State<span class="required">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="state" placeholder="e.g., California" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <i class="fas fa-city"></i>
+                    City<span class="required">*</span>
+                </label>
+                <input type="text" class="form-control" id="city" placeholder="e.g., San Francisco" required>
+            </div>
+
+            <div class="form-row">
                 <div class="form-group">
                     <label>
                         <i class="fas fa-briefcase"></i>
@@ -976,9 +1012,7 @@
                         <option value="Lead">Lead (8+ years)</option>
                     </select>
                 </div>
-            </div>
 
-            <div class="form-row">
                 <div class="form-group">
                     <label>
                         <i class="fas fa-clock"></i>
@@ -993,23 +1027,22 @@
                         <option value="Internship">Internship</option>
                     </select>
                 </div>
-
-                <div class="form-group">
-                    <label>
-                        <i class="fas fa-graduation-cap"></i>
-                        Education<span class="required">*</span>
-                    </label>
-                    <select class="form-control" id="education" required>
-                        <option value="">Select education level</option>
-                        <option value="High School">High School</option>
-                        <option value="Associate Degree">Associate Degree</option>
-                        <option value="Bachelor's Degree">Bachelor's Degree</option>
-                        <option value="Master's Degree">Master's Degree</option>
-                        <option value="Doctorate">Doctorate (PhD)</option>
-                        <option value="Any">Any</option>
-                    </select>
-                </div>
             </div>
+
+            <div class="form-group">
+    <label>
+        <i class="fas fa-book"></i>
+        Course<span class="required">*</span>
+    </label>
+    <input 
+        type="text" 
+        class="form-control" 
+        id="course" 
+        placeholder="Enter your course (e.g., BCA,  etc.)"
+        required
+    >
+</div>
+
 
             <div class="button-group">
                 <button type="button" class="btn btn-secondary" onclick="resetForm()">
@@ -1219,10 +1252,15 @@
             company_name: document.getElementById('companyName').value.trim(),
             job_description: document.getElementById('jobDescription').value.trim(),
             skills_required: skills,
+            sector: document.getElementById('sector').value,
             package: document.getElementById('package').value.trim(),
+            country: document.getElementById('country').value.trim(),
+            state: document.getElementById('state').value.trim(),
+            city: document.getElementById('city').value.trim(),
             experience_required: document.getElementById('experience').value,
             job_type: document.getElementById('jobType').value,
-            education: document.getElementById('education').value,
+            course: document.getElementById('course').value.trim(),
+
             created_at: new Date().toISOString()
         };
 
@@ -1276,4 +1314,4 @@
     });
 </script>
 </body>
-</html
+</html>

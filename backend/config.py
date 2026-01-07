@@ -10,7 +10,7 @@ class Config:
     
     # Database Configuration
     DB_SERVER = 'POOJA\\SQLEXPRESS'  # Your SQL Server instance
-    DB_NAME = 'resume_builder'
+    DB_NAME = 'Resume'
     
     # Connection string using Windows Authentication
     CONNECTION_STRING = (
@@ -36,7 +36,7 @@ class Config:
             print(f"❌ Database connection error: {str(e)}")
             print("\nTroubleshooting tips:")
             print("1. Make sure SQL Server is running")
-            print("2. Verify database 'resume_builder' exists")
+            print("2. Verify database 'Resume' exists")
             print("3. Check Windows Authentication is enabled")
             print("4. Try: services.msc > SQL Server (SQLEXPRESS) > Start")
             raise
