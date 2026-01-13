@@ -145,7 +145,7 @@
 
     async function loadData() {
         try {
-            const response = await fetch(`${API_BASE}/skills-master`);
+            const response = await fetch(`${API_BASE}/job-skills-master`);
             const result = await response.json();
             if (result.success) {
                 skills = result.data;
@@ -167,24 +167,24 @@
         }
         tbody.innerHTML = data.map(item => {
             let categoryBadge = '';
-            if (item.SkillCategory) {
-                const badgeClass = item.SkillCategory === 'Technical' ? 'badge-technical' :
-                                  item.SkillCategory === 'Professional' ? 'badge-professional' : 'badge-personal';
-                categoryBadge = `<span class="skill-badge ${badgeClass}">${item.SkillCategory}</span>`;
+            if (item.Category) {
+                const badgeClass = item.Category === 'Technical' ? 'badge-technical' :
+                                  item.Category === 'Professional' ? 'badge-professional' : 'badge-personal';
+                categoryBadge = `<span class="skill-badge ${badgeClass}">${item.Category}</span>`;
             } else {
                 categoryBadge = '-';
             }
             
             return `
             <tr>
-                <td>${item.SkillMasterID}</td>
+                <td>${item.SkillID}</td>
                 <td>${item.SkillName}</td>
                 <td>${categoryBadge}</td>
                 <td>
-                    <button class="action-btn btn-edit" onclick="editItem(${item.SkillMasterID})">
+                    <button class="action-btn btn-edit" onclick="editItem(${item.SkillID})">
                         <i class="fas fa-edit"></i> Edit
                     </button>
-                    <button class="action-btn btn-delete" onclick="deleteItem(${item.SkillMasterID})">
+                    <button class="action-btn btn-delete" onclick="deleteItem(${item.SkillID})">
                         <i class="fas fa-trash"></i> Delete
                     </button>
                 </td>
@@ -195,7 +195,7 @@
     function filterData(searchTerm) {
         const filtered = skills.filter(item => 
             item.SkillName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (item.SkillCategory && item.SkillCategory.toLowerCase().includes(searchTerm.toLowerCase()))
+            (item.Category && item.Category.toLowerCase().includes(searchTerm.toLowerCase()))
         );
         renderTable(filtered);
     }
@@ -208,12 +208,12 @@
     }
 
     function editItem(id) {
-        const item = skills.find(s => s.SkillMasterID === id);
+        const item = skills.find(s => s.SkillID === id);
         if (!item) return;
         document.getElementById('modalTitle').textContent = 'Edit Skill';
-        document.getElementById('itemId').value = item.SkillMasterID;
+        document.getElementById('itemId').value = item.SkillID;
         document.getElementById('skillName').value = item.SkillName;
-        document.getElementById('skillCategory').value = item.SkillCategory || '';
+        document.getElementById('skillCategory').value = item.Category || '';
         document.getElementById('dataModal').classList.add('show');
     }
 
@@ -226,10 +226,10 @@
         const id = document.getElementById('itemId').value;
         const data = {
             SkillName: document.getElementById('skillName').value.trim(),
-            SkillCategory: document.getElementById('skillCategory').value.trim()
+            Category: document.getElementById('skillCategory').value.trim()
         };
         try {
-            const url = id ? `${API_BASE}/skills-master/${id}` : `${API_BASE}/skills-master`;
+            const url = id ? `${API_BASE}/job-skills-master/${id}` : `${API_BASE}/job-skills-master`;
             const method = id ? 'PUT' : 'POST';
             const response = await fetch(url, {
                 method: method,
@@ -253,7 +253,7 @@
     async function deleteItem(id) {
         if (!confirm('Are you sure you want to delete this skill?')) return;
         try {
-            const response = await fetch(`${API_BASE}/skills-master/${id}`, { method: 'DELETE' });
+            const response = await fetch(`${API_BASE}/job-skills-master/${id}`, { method: 'DELETE' });
             const result = await response.json();
             if (result.success) {
                 showSuccess('Skill deleted successfully');
