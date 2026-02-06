@@ -169,6 +169,7 @@ async function trackDownload() {
 
 // Track visitor on page load
 window.addEventListener('DOMContentLoaded', () => {
+    initializeUserDisplay();
     trackVisitor();
 });
 
